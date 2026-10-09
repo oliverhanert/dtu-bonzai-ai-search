@@ -43,6 +43,19 @@ class BonzaiClient {
     return BonzaiClient._normalize(data);
   }
 
+  async _get(path) {
+    const res = await fetch(`${this.baseUrl}${path}`, {
+      headers: { "X-API-Key": this.apiKey },
+    });
+
+    if (!res.ok) {
+      throw new Error(`Bonzai API error (${res.status}): ${res.statusText}`);
+    }
+
+    const data = await res.json();
+    return BonzaiClient._normalize(data);
+  }
+
   /**
    * The live API returns PascalCase keys (Response/Answer/References) even
    * though the published OpenAPI spec documents camelCase. Normalize both
@@ -74,6 +87,16 @@ class BonzaiClient {
     }
 
     return this._post(`/api/v1/conversation/${this.conversationId}`, { prompt });
+  }
+
+  /**
+   * Fetch example questions configured in Bonzai admin ("Example questions" tab)
+   * for this agent, so suggested chips are managed centrally instead of hardcoded
+   * per page.
+   */
+  async getExampleQuestions() {
+    const data = await this._get(`/api/v1/examplequestion?agentId=${this.agentId}`);
+    return Array.isArray(data) ? data : [];
   }
 
   async sendFeedback(messageId, feedbackScore, feedback) {

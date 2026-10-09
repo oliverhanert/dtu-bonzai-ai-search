@@ -3,6 +3,10 @@
  * reading its own context (topic, suggested questions) from data attributes so
  * the same component can be dropped onto any page (course, topic hub, degree, etc.)
  * and feel tailored to that page's content.
+ *
+ * Suggested questions: if data-bonzai-suggestions is omitted, the widget asks
+ * Bonzai for the agent's configured example questions (Agent config > Example
+ * questions), so suggestions can be managed centrally instead of per page.
  */
 (function () {
   function escapeHtml(str) {
@@ -13,7 +17,7 @@
 
   function initWidget(el) {
     const topic = el.dataset.bonzaiTopic || "DTU Learn for Life";
-    const chips = (el.dataset.bonzaiSuggestions || "")
+    const staticChips = (el.dataset.bonzaiSuggestions || "")
       .split("|")
       .map((s) => s.trim())
       .filter(Boolean);
@@ -25,9 +29,7 @@
     el.innerHTML = `
       <div class="bonzai-heading"><span class="dot"></span> Ask about ${escapeHtml(topic)}</div>
       <div class="bonzai-sub">AI search trained on this page's content, powered by IO Bonzai.</div>
-      <div class="bonzai-chips">
-        ${chips.map((q) => `<button class="bonzai-chip" type="button">${escapeHtml(q)}</button>`).join("")}
-      </div>
+      <div class="bonzai-chips"></div>
       <div class="bonzai-thread" aria-live="polite"></div>
       <div class="bonzai-input-row">
         <input type="text" placeholder="Ask a question..." aria-label="Ask Bonzai AI search" />
@@ -36,9 +38,19 @@
       <div class="bonzai-footer-note">Answers are generated from indexed content and may be imperfect.</div>
     `;
 
+    const chipsContainer = el.querySelector(".bonzai-chips");
     const thread = el.querySelector(".bonzai-thread");
     const input = el.querySelector(".bonzai-input-row input");
     const sendBtn = el.querySelector(".bonzai-input-row button");
+
+    function renderChips(questions) {
+      chipsContainer.innerHTML = questions
+        .map((q) => `<button class="bonzai-chip" type="button">${escapeHtml(q)}</button>`)
+        .join("");
+      chipsContainer.querySelectorAll(".bonzai-chip").forEach((chip) => {
+        chip.addEventListener("click", () => ask(chip.textContent));
+      });
+    }
 
     function getClient() {
       const cfg = window.BonzaiConfig ? window.BonzaiConfig.get() : null;
@@ -49,6 +61,20 @@
       return el._client;
     }
 
+    // Suggested questions: prefer explicit per-page overrides, otherwise pull
+    // the agent's centrally configured example questions from Bonzai.
+    if (staticChips.length) {
+      renderChips(staticChips);
+    } else {
+      const client = getClient();
+      if (client) {
+        client
+          .getExampleQuestions()
+          .then((questions) => renderChips(questions.map((q) => q.question).slice(0, 4)))
+          .catch(() => renderChips([]));
+      }
+    }
+
     function addMessage(role, html) {
       const div = document.createElement("div");
       div.className = `bonzai-msg ${role}`;
@@ -56,6 +82,28 @@
       thread.appendChild(div);
       thread.scrollTop = thread.scrollHeight;
       return div;
+    }
+
+    function addFeedbackRow(container, client, messageId) {
+      const row = document.createElement("div");
+      row.className = "bonzai-feedback";
+      row.innerHTML = `
+        <button type="button" data-score="5" aria-label="Good answer">&#128077;</button>
+        <button type="button" data-score="1" aria-label="Bad answer">&#128078;</button>
+        <span class="bonzai-feedback-thanks" hidden>Thanks for the feedback!</span>
+      `;
+      row.querySelectorAll("button").forEach((btn) => {
+        btn.addEventListener("click", async () => {
+          row.querySelectorAll("button").forEach((b) => (b.disabled = true));
+          try {
+            await client.sendFeedback(messageId, Number(btn.dataset.score));
+            row.querySelector(".bonzai-feedback-thanks").hidden = false;
+          } catch (_) {
+            /* best-effort; demo should not break on feedback failure */
+          }
+        });
+      });
+      container.appendChild(row);
     }
 
     async function ask(question) {
@@ -85,6 +133,10 @@
             .join("");
           loadingMsg.innerHTML += `<div class="bonzai-refs">${refsHtml}</div>`;
         }
+
+        if (data.response && data.response.messageId) {
+          addFeedbackRow(loadingMsg, client, data.response.messageId);
+        }
       } catch (err) {
         loadingMsg.classList.remove("loading");
         loadingMsg.innerHTML = `Something went wrong: ${escapeHtml(err.message)}`;
@@ -96,9 +148,6 @@
     sendBtn.addEventListener("click", () => ask(input.value));
     input.addEventListener("keydown", (e) => {
       if (e.key === "Enter") ask(input.value);
-    });
-    el.querySelectorAll(".bonzai-chip").forEach((chip) => {
-      chip.addEventListener("click", () => ask(chip.textContent));
     });
   }
 

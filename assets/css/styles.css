@@ -321,6 +321,58 @@ img { max-width: 100%; display: block; }
 .footer-col a { font-size: 13px; }
 .footer-bottom { margin-top: 56px; font-size: 12px; opacity: 0.6; border-top: 1px solid var(--c-border-subtle); padding-top: 24px; }
 
+/* ---------------------------------------------------------------- */
+/* Single course page                                                */
+/* ---------------------------------------------------------------- */
+.course-hero {
+  display: flex;
+  flex-wrap: wrap;
+  padding-top: 100px;
+}
+.course-hero-left {
+  background: var(--c-bg-charcoal);
+  color: #fff;
+  flex: 1 1 480px;
+  padding: 64px var(--page-pad) 64px 48px;
+}
+.course-hero-right {
+  flex: 1 1 480px;
+  min-height: 420px;
+  background: #111 url("https://images.unsplash.com/photo-1466611653911-95081537e5b7?q=80&w=1200&auto=format&fit=crop") center/cover;
+}
+.course-hero h1 { font-size: clamp(32px, 4vw, 54px); margin: 24px 0; }
+.course-hero .hero-subtext { margin-bottom: 32px; }
+.course-hero-ctas { display: flex; gap: 16px; flex-wrap: wrap; }
+
+.course-meta-bar {
+  background: rgba(10, 10, 10, 0.9);
+  color: #fff;
+  display: flex;
+  gap: 32px;
+  padding: 24px var(--page-pad);
+  flex-wrap: wrap;
+}
+.course-meta-bar .item .label { font-size: 12px; letter-spacing: 0.15em; text-transform: uppercase; opacity: 0.6; }
+.course-meta-bar .item .value { font-size: 14px; margin-top: 4px; }
+
+.course-layout {
+  display: flex;
+  gap: 64px;
+  padding: var(--space-6xl) var(--page-pad);
+  align-items: flex-start;
+  flex-wrap: wrap;
+}
+.course-content { flex: 2 1 500px; }
+.course-content h3.section-heading { font-size: 24px; margin-top: 48px; }
+.course-content h3.section-heading:first-child { margin-top: 0; }
+.course-content p { font-size: 17px; color: var(--c-text-muted-on-light); max-width: var(--content-body); }
+.course-sidebar { flex: 1 1 320px; display: flex; flex-direction: column; gap: 24px; }
+.sidebar-card { background: var(--c-bg-gray); padding: 32px; }
+.sidebar-card h5 { font-size: 15px; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 16px; }
+.sidebar-card ul { padding-left: 18px; font-size: 14px; color: var(--c-text-muted-on-light); margin: 0; }
+.breadcrumb { padding: 120px var(--page-pad) 0; font-size: 13px; color: var(--c-text-muted-on-light); }
+.breadcrumb a { text-decoration: underline; }
+
 /* ====================================================================
    Bonzai AI Search widget
    ==================================================================== */
@@ -381,6 +433,21 @@ img { max-width: 100%; display: block; }
 .bonzai-refs { margin-top: 8px; display: flex; flex-direction: column; gap: 4px; font-size: 12px; }
 .bonzai-refs a { display: block; color: #666; }
 .bonzai-widget.on-dark .bonzai-refs a { color: #aaa; }
+
+.bonzai-feedback { margin-top: 10px; display: flex; align-items: center; gap: 8px; }
+.bonzai-feedback button {
+  border: none;
+  background: rgba(0,0,0,0.06);
+  border-radius: 6px;
+  width: 28px;
+  height: 28px;
+  font-size: 13px;
+  cursor: pointer;
+}
+.bonzai-widget.on-dark .bonzai-feedback button { background: rgba(255,255,255,0.1); }
+.bonzai-feedback button:disabled { opacity: 0.5; cursor: default; }
+.bonzai-feedback-thanks { font-size: 11px; color: var(--c-text-muted-on-light); }
+.bonzai-widget.on-dark .bonzai-feedback-thanks { color: var(--c-text-muted-on-dark); }
 
 .bonzai-input-row { display: flex; gap: 8px; }
 .bonzai-input-row input {
