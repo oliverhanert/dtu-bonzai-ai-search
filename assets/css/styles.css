@@ -1,6 +1,10 @@
 /* ====================================================================
    DTU Learn for Life — Design tokens (extracted from lfl-design-spec.md)
+   Font matches the live learnforlife.dtu.dk theme (--font-family-base),
+   which uses Noto Sans Lao for all text, including headings.
    ==================================================================== */
+@import url("https://fonts.googleapis.com/css2?family=Noto+Sans+Lao:wght@300;400;500;600;700&display=swap");
+
 :root {
   /* Colors */
   --c-bg-dark: #282828;
@@ -28,10 +32,10 @@
   --c-overlay-stats: rgba(0, 0, 0, 0.3);
   --c-border-subtle: rgba(255, 255, 255, 0.2);
 
-  /* Typography */
-  --font-display: "Neo Sans Std", "Arial Narrow", Arial, sans-serif;
-  --font-body: "Noto Sans Lao", "Noto Sans", Arial, sans-serif;
-  --font-nav: "Noto Sans", Arial, sans-serif;
+  /* Typography — matches live site: one family for everything */
+  --font-display: "Noto Sans Lao", Arial, sans-serif;
+  --font-body: "Noto Sans Lao", Arial, sans-serif;
+  --font-nav: "Noto Sans Lao", Arial, sans-serif;
 
   /* Spacing */
   --space-xs: 6px;
@@ -69,7 +73,8 @@ h1, h2, h3, h4 {
   font-family: var(--font-display);
   text-transform: uppercase;
   margin: 0;
-  font-weight: 400;
+  font-weight: 600;
+  letter-spacing: 0.01em;
 }
 
 a { color: inherit; text-decoration: none; }
@@ -377,97 +382,169 @@ img { max-width: 100%; display: block; }
    Bonzai AI Search widget
    ==================================================================== */
 .bonzai-widget {
-  background: var(--c-bg-gray);
-  border-radius: 4px;
+  background: #f3f1ee;
+  border-radius: 18px;
   padding: 32px;
   max-width: 560px;
   display: flex;
   flex-direction: column;
   gap: 16px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.04), 0 12px 32px rgba(0,0,0,0.06);
 }
-.bonzai-widget.on-dark { background: #1a1a1a; border: 1px solid var(--c-border-subtle); color: #fff; }
+.bonzai-widget.on-dark {
+  background: #181818;
+  border: 1px solid var(--c-border-subtle);
+  color: #fff;
+  box-shadow: 0 12px 32px rgba(0,0,0,0.35);
+}
 .bonzai-widget .bonzai-heading {
   font-family: var(--font-body);
   font-weight: 600;
-  font-size: 20px;
-  letter-spacing: 0.08em;
+  font-size: 19px;
+  letter-spacing: 0.04em;
   text-transform: uppercase;
   display: flex;
   align-items: center;
   gap: 10px;
 }
-.bonzai-widget .bonzai-heading .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--c-accent-red); display: inline-block; }
-.bonzai-widget .bonzai-sub { font-size: 13px; color: var(--c-text-muted-on-light); }
+.bonzai-widget .bonzai-heading .dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: var(--c-accent-red);
+  display: inline-block;
+  box-shadow: 0 0 0 0 rgba(153, 0, 0, 0.5);
+  animation: bonzai-pulse 2.4s ease-out infinite;
+}
+.bonzai-widget .bonzai-sub { font-size: 13px; color: var(--c-text-muted-on-light); margin-top: -4px; }
 .bonzai-widget.on-dark .bonzai-sub { color: var(--c-text-muted-on-dark); }
+
+@keyframes bonzai-pulse {
+  0% { box-shadow: 0 0 0 0 rgba(153, 0, 0, 0.45); }
+  70% { box-shadow: 0 0 0 6px rgba(153, 0, 0, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(153, 0, 0, 0); }
+}
 
 .bonzai-chips { display: flex; gap: 8px; flex-wrap: wrap; }
 .bonzai-chip {
-  font-size: 12px;
-  letter-spacing: 0.04em;
-  padding: 8px 14px;
-  border: 1px solid rgba(0,0,0,0.25);
+  font-size: 12.5px;
+  font-family: var(--font-body);
+  letter-spacing: 0.02em;
+  padding: 9px 16px;
+  border: 1px solid rgba(0,0,0,0.15);
   border-radius: 20px;
   cursor: pointer;
   background: #fff;
   text-align: left;
+  transition: background 0.15s ease, border-color 0.15s ease, transform 0.1s ease;
 }
 .bonzai-widget.on-dark .bonzai-chip { background: transparent; border-color: var(--c-border-subtle); color: #fff; }
-.bonzai-chip:hover { background: #f0f0f0; }
-.bonzai-widget.on-dark .bonzai-chip:hover { background: rgba(255,255,255,0.08); }
+.bonzai-chip:hover { background: #fff; border-color: var(--c-accent-red); transform: translateY(-1px); }
+.bonzai-widget.on-dark .bonzai-chip:hover { background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.4); }
 
 .bonzai-thread {
   display: flex;
   flex-direction: column;
   gap: 12px;
-  max-height: 360px;
+  max-height: 420px;
   overflow-y: auto;
   padding-right: 4px;
+  scroll-behavior: smooth;
 }
 .bonzai-thread:empty { display: none; }
-.bonzai-msg { font-size: 14px; line-height: 1.5; padding: 12px 14px; border-radius: 10px; max-width: 92%; }
-.bonzai-msg.user { align-self: flex-end; background: var(--c-accent-red); color: #fff; }
-.bonzai-msg.assistant { align-self: flex-start; background: #fff; color: #111; }
-.bonzai-widget.on-dark .bonzai-msg.assistant { background: #2b2b2b; color: #fff; }
-.bonzai-msg.assistant.loading { font-style: italic; color: #777; }
-.bonzai-msg a { color: var(--c-accent-red); text-decoration: underline; }
-.bonzai-refs { margin-top: 8px; display: flex; flex-direction: column; gap: 4px; font-size: 12px; }
-.bonzai-refs a { display: block; color: #666; }
-.bonzai-widget.on-dark .bonzai-refs a { color: #aaa; }
-
-.bonzai-feedback { margin-top: 10px; display: flex; align-items: center; gap: 8px; }
-.bonzai-feedback button {
-  border: none;
-  background: rgba(0,0,0,0.06);
-  border-radius: 6px;
-  width: 28px;
-  height: 28px;
-  font-size: 13px;
-  cursor: pointer;
+.bonzai-msg {
+  font-family: var(--font-body);
+  font-size: 14.5px;
+  line-height: 1.6;
+  padding: 13px 16px;
+  border-radius: 14px;
+  max-width: 92%;
+  opacity: 0;
+  transform: translateY(6px);
+  transition: opacity 0.25s ease, transform 0.25s ease;
 }
-.bonzai-widget.on-dark .bonzai-feedback button { background: rgba(255,255,255,0.1); }
-.bonzai-feedback button:disabled { opacity: 0.5; cursor: default; }
-.bonzai-feedback-thanks { font-size: 11px; color: var(--c-text-muted-on-light); }
-.bonzai-widget.on-dark .bonzai-feedback-thanks { color: var(--c-text-muted-on-dark); }
+.bonzai-msg.in { opacity: 1; transform: translateY(0); }
+.bonzai-msg.user { align-self: flex-end; background: var(--c-accent-red); color: #fff; border-radius: 14px 14px 2px 14px; }
+.bonzai-msg.assistant {
+  align-self: flex-start;
+  background: #fff;
+  color: #171717;
+  border: 1px solid rgba(0,0,0,0.06);
+  border-radius: 14px 14px 14px 2px;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+}
+.bonzai-widget.on-dark .bonzai-msg.assistant { background: #262626; color: #fff; border-color: rgba(255,255,255,0.08); }
+.bonzai-msg.assistant.loading { padding: 16px; }
+.bonzai-msg.assistant.typing::after {
+  content: "";
+  display: inline-block;
+  width: 2px;
+  height: 1em;
+  margin-left: 2px;
+  vertical-align: -2px;
+  background: var(--c-accent-red);
+  animation: bonzai-caret 0.9s steps(1) infinite;
+}
+@keyframes bonzai-caret { 0%, 50% { opacity: 1; } 50.01%, 100% { opacity: 0; } }
+
+.bonzai-dots { display: inline-flex; gap: 4px; align-items: center; }
+.bonzai-dots span {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--c-accent-gray-tag);
+  animation: bonzai-bounce 1.1s ease-in-out infinite;
+}
+.bonzai-widget.on-dark .bonzai-dots span { background: rgba(255,255,255,0.5); }
+.bonzai-dots span:nth-child(2) { animation-delay: 0.15s; }
+.bonzai-dots span:nth-child(3) { animation-delay: 0.3s; }
+@keyframes bonzai-bounce {
+  0%, 60%, 100% { transform: translateY(0); opacity: 0.5; }
+  30% { transform: translateY(-4px); opacity: 1; }
+}
+
+.bonzai-msg a { color: var(--c-accent-red); text-decoration: underline; text-decoration-color: rgba(153,0,0,0.35); }
+.bonzai-msg a:hover { text-decoration-color: currentColor; }
+.bonzai-refs {
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid rgba(0,0,0,0.08);
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  font-size: 12px;
+}
+.bonzai-widget.on-dark .bonzai-refs { border-top-color: rgba(255,255,255,0.1); }
+.bonzai-refs a { display: block; color: #666; text-decoration: none; }
+.bonzai-refs a:hover { text-decoration: underline; }
+.bonzai-widget.on-dark .bonzai-refs a { color: #aaa; }
 
 .bonzai-input-row { display: flex; gap: 8px; }
 .bonzai-input-row input {
   flex: 1;
-  height: 46px;
-  padding: 0 16px;
-  border: 1px solid rgba(0,0,0,0.2);
+  height: 48px;
+  padding: 0 18px;
+  border: 1px solid rgba(0,0,0,0.15);
+  border-radius: 24px;
   font-family: var(--font-body);
   font-size: 15px;
   background: #fff;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+.bonzai-input-row input:focus {
+  outline: none;
+  border-color: var(--c-accent-red);
+  box-shadow: 0 0 0 3px rgba(153, 0, 0, 0.1);
 }
 .bonzai-widget.on-dark .bonzai-input-row input { background: #262626; border-color: var(--c-border-subtle); color: #fff; }
 .bonzai-input-row button {
-  width: 46px; height: 46px;
+  width: 48px; height: 48px;
+  border-radius: 50%;
   border: none;
   background: var(--c-accent-red);
   color: #fff;
   cursor: pointer;
   display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+  transition: background 0.15s ease, transform 0.1s ease;
 }
+.bonzai-input-row button:hover:not(:disabled) { background: #7a0000; transform: scale(1.04); }
 .bonzai-input-row button:disabled { opacity: 0.5; cursor: default; }
 
 .bonzai-footer-note { font-size: 11px; color: var(--c-text-placeholder); }

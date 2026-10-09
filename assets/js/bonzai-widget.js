@@ -7,6 +7,9 @@
  * Suggested questions: if data-bonzai-suggestions is omitted, the widget asks
  * Bonzai for the agent's configured example questions (Agent config > Example
  * questions), so suggestions can be managed centrally instead of per page.
+ *
+ * Responses stream in token-by-token (default Bonzai widget behavior), with a
+ * blinking caret while text is still arriving.
  */
 (function () {
   function escapeHtml(str) {
@@ -33,7 +36,9 @@
       <div class="bonzai-thread" aria-live="polite"></div>
       <div class="bonzai-input-row">
         <input type="text" placeholder="Ask a question..." aria-label="Ask Bonzai AI search" />
-        <button type="button" aria-label="Send">&#8594;</button>
+        <button type="button" aria-label="Send">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+        </button>
       </div>
       <div class="bonzai-footer-note">Answers are generated from indexed content and may be imperfect.</div>
     `;
@@ -80,30 +85,13 @@
       div.className = `bonzai-msg ${role}`;
       div.innerHTML = html;
       thread.appendChild(div);
+      requestAnimationFrame(() => div.classList.add("in"));
       thread.scrollTop = thread.scrollHeight;
       return div;
     }
 
-    function addFeedbackRow(container, client, messageId) {
-      const row = document.createElement("div");
-      row.className = "bonzai-feedback";
-      row.innerHTML = `
-        <button type="button" data-score="5" aria-label="Good answer">&#128077;</button>
-        <button type="button" data-score="1" aria-label="Bad answer">&#128078;</button>
-        <span class="bonzai-feedback-thanks" hidden>Thanks for the feedback!</span>
-      `;
-      row.querySelectorAll("button").forEach((btn) => {
-        btn.addEventListener("click", async () => {
-          row.querySelectorAll("button").forEach((b) => (b.disabled = true));
-          try {
-            await client.sendFeedback(messageId, Number(btn.dataset.score));
-            row.querySelector(".bonzai-feedback-thanks").hidden = false;
-          } catch (_) {
-            /* best-effort; demo should not break on feedback failure */
-          }
-        });
-      });
-      container.appendChild(row);
+    function setTyping(container, isTyping) {
+      container.classList.toggle("typing", isTyping);
     }
 
     async function ask(question) {
@@ -118,7 +106,8 @@
       addMessage("user", escapeHtml(question));
       input.value = "";
       sendBtn.disabled = true;
-      const loadingMsg = addMessage("assistant loading", "Searching…");
+
+      const loadingMsg = addMessage("assistant loading", '<span class="bonzai-dots"><span></span><span></span><span></span></span>');
       let answerSoFar = "";
       let firstChunk = true;
 
@@ -126,6 +115,7 @@
         const finalEvent = await client.sendMessageStreaming(question, { topic }, (delta) => {
           if (firstChunk) {
             loadingMsg.classList.remove("loading");
+            setTyping(loadingMsg, true);
             answerSoFar = "";
             firstChunk = false;
           }
@@ -136,6 +126,8 @@
           thread.scrollTop = thread.scrollHeight;
         });
 
+        setTyping(loadingMsg, false);
+
         if (!answerSoFar) {
           loadingMsg.classList.remove("loading");
           loadingMsg.innerHTML = "No answer returned.";
@@ -143,15 +135,12 @@
 
         if (finalEvent && finalEvent.references && finalEvent.references.length) {
           const refsHtml = finalEvent.references
-            .map((r) => `<a href="${escapeHtml(r.url)}" target="_blank" rel="noopener">[${r.index}] ${escapeHtml(r.title || r.url)}</a>`)
+            .map((r) => `<a href="${escapeHtml(r.url)}" target="_blank" rel="noopener">${escapeHtml(r.title || r.url)}</a>`)
             .join("");
           loadingMsg.innerHTML += `<div class="bonzai-refs">${refsHtml}</div>`;
         }
-
-        if (finalEvent && finalEvent.response && finalEvent.response.messageId) {
-          addFeedbackRow(loadingMsg, client, finalEvent.response.messageId);
-        }
       } catch (err) {
+        setTyping(loadingMsg, false);
         loadingMsg.classList.remove("loading");
         loadingMsg.innerHTML = `Something went wrong: ${escapeHtml(err.message)}`;
       } finally {
