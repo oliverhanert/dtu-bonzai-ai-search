@@ -30,17 +30,17 @@
     if (theme === "dark") el.classList.add("on-dark");
 
     el.innerHTML = `
-      <div class="bonzai-heading"><span class="dot"></span> Ask about ${escapeHtml(topic)}</div>
-      <div class="bonzai-sub">AI search trained on this page's content, powered by IO Bonzai.</div>
+      <div class="bonzai-heading">Ask about ${escapeHtml(topic)}</div>
+      <div class="bonzai-sub">Get a quick answer with links to the relevant pages.</div>
       <div class="bonzai-chips"></div>
       <div class="bonzai-thread" aria-live="polite"></div>
       <div class="bonzai-input-row">
-        <input type="text" placeholder="Ask a question..." aria-label="Ask Bonzai AI search" />
+        <input type="text" placeholder="Ask a question..." aria-label="Ask a question" />
         <button type="button" aria-label="Send">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
         </button>
       </div>
-      <div class="bonzai-footer-note">Answers are generated from indexed content and may be imperfect.</div>
+      <div class="bonzai-footer-note">Answers are based on this site's content and may be imperfect.</div>
     `;
 
     const chipsContainer = el.querySelector(".bonzai-chips");
@@ -90,10 +90,6 @@
       return div;
     }
 
-    function setTyping(container, isTyping) {
-      container.classList.toggle("typing", isTyping);
-    }
-
     async function ask(question) {
       if (!question.trim()) return;
 
@@ -115,7 +111,6 @@
         const finalEvent = await client.sendMessageStreaming(question, { topic }, (delta) => {
           if (firstChunk) {
             loadingMsg.classList.remove("loading");
-            setTyping(loadingMsg, true);
             answerSoFar = "";
             firstChunk = false;
           }
@@ -125,8 +120,6 @@
           loadingMsg.innerHTML = answerSoFar;
           thread.scrollTop = thread.scrollHeight;
         });
-
-        setTyping(loadingMsg, false);
 
         if (!answerSoFar) {
           loadingMsg.classList.remove("loading");
