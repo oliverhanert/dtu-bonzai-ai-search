@@ -6,9 +6,9 @@
 <title>Offshore Operations — Single Course — DTU Learn for Life</title>
 <link rel="stylesheet" href="assets/css/styles.css" />
 </head>
-<body>
+<body class="page-single-course">
 
-<nav class="navbar" id="navbar">
+<nav class="navbar navbar--on-charcoal" id="navbar">
   <div class="logo">
     <img src="assets/img/dtu-logo-white.png" alt="DTU" />
   </div>
@@ -34,16 +34,18 @@
       <span class="tag tag-single">Single course</span>
     </div>
     <h1>Offshore Operations &amp; Maintenance</h1>
-    <p class="hero-subtext">
+    <p class="hero-subtext hero-subtext--charcoal">
       Learn the logistics, safety protocols and predictive maintenance strategies
       used to keep offshore wind farms running at scale.
     </p>
     <div class="course-hero-ctas">
-      <button class="btn btn-primary">Apply now</button>
-      <button class="btn btn-ghost">Download course description</button>
+      <button class="btn btn-primary" type="button">Apply now</button>
+      <button class="btn btn-ghost btn-ghost--on-charcoal" type="button">Download course description</button>
     </div>
   </div>
-  <div class="course-hero-right" role="img" aria-label="Offshore wind farm"></div>
+  <div class="course-hero-right">
+    <img src="assets/img/turbines-sunset.jpg" alt="Offshore wind farm at sunset" />
+  </div>
 </section>
 
 <div class="course-meta-bar">
@@ -56,7 +58,7 @@
 
 <div class="course-layout">
   <div class="course-content">
-    <h3 class="section-heading">What this course is about</h3>
+    <h3 class="course-section-title">What this course is about</h3>
     <p>
       Offshore wind farms require specialized logistics and maintenance planning to stay
       operational in harsh marine environments. This course covers vessel scheduling,
@@ -64,36 +66,34 @@
       Ørsted and Siemens Gamesa.
     </p>
 
-    <h3 class="section-heading">What you'll learn</h3>
+    <h3 class="course-section-title">What you'll learn</h3>
     <p>
       You'll leave with practical frameworks for planning maintenance windows around weather
       systems, interpreting turbine sensor data to predict failures before they happen, and
       coordinating offshore crews safely and efficiently.
     </p>
 
-    <h3 class="section-heading">Format, time and place</h3>
+    <h3 class="course-section-title">Format, time and place</h3>
     <p>
       Fully online across 13 weeks, with three live virtual sessions and a final project
-      based on a real maintenance case. Expect 4-6 hours of self-paced study per week.
+      based on a real maintenance case. Expect 4–6 hours of self-paced study per week.
     </p>
 
-    <h3 class="section-heading">Admission and prerequisites</h3>
+    <h3 class="course-section-title">Admission and prerequisites</h3>
     <p>
       Open to engineers, technicians and project managers with a background in mechanical,
       electrical or marine engineering, or equivalent practical experience in the wind
       energy sector.
     </p>
 
-    <!-- Bonzai AI Search widget: same component as the topic page, re-themed and
-         re-contextualized for this specific course via data attributes only. -->
     <div
       data-bonzai-widget
-      data-bonzai-topic="Offshore Operations &amp; Maintenance course"
-      style="margin-top: 48px;"
+      data-bonzai-topic="Offshore Operations &amp; Maintenance"
+      data-bonzai-suggestions="Who is this course for? | What are the admission requirements? | Can I combine this with the Master in Wind Energy? | How much time per week?"
     ></div>
   </div>
 
-  <div class="course-sidebar">
+  <aside class="course-sidebar">
     <div class="sidebar-card">
       <h5>This course is for you if…</h5>
       <ul>
@@ -104,8 +104,8 @@
     </div>
     <div class="sidebar-card">
       <h5>Not quite the right course?</h5>
-      <p style="font-size:14px; margin:0 0 12px;">Explore the full Wind Energy topic hub for related courses and the Master Programme.</p>
-      <a class="link" href="index.html">Back to Wind Energy &rarr;</a>
+      <p class="sidebar-lead">Explore the Wind Energy topic hub for related courses and the Master Programme.</p>
+      <a class="link" href="index.html">Back to Wind Energy →</a>
     </div>
     <div class="sidebar-card">
       <h5>Good to know</h5>
@@ -115,14 +115,70 @@
         <li>Company invoicing available</li>
       </ul>
     </div>
-  </div>
+  </aside>
 </div>
+
+<section class="section section-light course-taught">
+  <h3 class="course-section-title">Taught by</h3>
+  <div class="people-row people-row--left">
+    <div class="person-card">
+      <div class="photo"></div>
+      <div class="name">Lars Holm</div>
+      <div class="title">Professor, Offshore Structures</div>
+      <a class="link" href="#">Research profile</a>
+    </div>
+    <div class="person-card">
+      <div class="photo"></div>
+      <div class="name">Hans Eriksen</div>
+      <div class="title">Senior Researcher, Grid Systems</div>
+      <a class="link" href="#">Research profile</a>
+    </div>
+  </div>
+</section>
+
+<section class="section section-light course-related">
+  <h3 class="course-section-title">Other wind courses</h3>
+  <div class="course-grid">
+    <div class="course-card">
+      <div>
+        <span class="label">Flexible</span>
+        <h4>Master in Wind Energy</h4>
+        <p class="desc">60 ECTS part-time master programme covering the full wind value chain.</p>
+      </div>
+      <div class="meta">185,000 DKK | 60 ECTS | 2 years</div>
+    </div>
+    <div class="course-card">
+      <div>
+        <span class="label">Online</span>
+        <h4>Grid Integration</h4>
+        <p class="desc">Balancing renewable supply with demand in modern power grids.</p>
+      </div>
+      <div class="meta">15,000 DKK | 5 ECTS | 13 weeks</div>
+    </div>
+    <div class="course-card">
+      <div>
+        <span class="label">On campus</span>
+        <h4>Wind Turbine Technology</h4>
+        <p class="desc">Design principles and materials behind modern turbines.</p>
+      </div>
+      <div class="meta">15,000 DKK | 5 ECTS | 13 weeks</div>
+    </div>
+    <div class="course-card">
+      <div>
+        <span class="label">Online</span>
+        <h4>Offshore Operations</h4>
+        <p class="desc">Logistics and maintenance for offshore wind farms.</p>
+      </div>
+      <div class="meta">15,000 DKK | 5 ECTS | 13 weeks</div>
+    </div>
+  </div>
+</section>
 
 <footer class="footer">
   <div class="footer-grid">
     <div class="footer-col">
       <h5>DTU Learn for Life</h5>
-      <p style="font-size:13px;">Anker Engelunds Vej 1<br/>2800 Kgs. Lyngby</p>
+      <p class="footer-address">Anker Engelunds Vej 1<br/>2800 Kgs. Lyngby</p>
     </div>
     <div class="footer-col">
       <h5>Shortcuts</h5>
@@ -149,5 +205,10 @@
 <script src="assets/js/bonzai-client.js"></script>
 <script src="assets/js/bonzai-config.js"></script>
 <script src="assets/js/bonzai-widget.js"></script>
+<script>
+  window.addEventListener("scroll", () => {
+    document.getElementById("navbar").classList.toggle("scrolled", window.scrollY > 20);
+  });
+</script>
 </body>
 </html>

@@ -1,15 +1,5 @@
 /**
- * Bonzai AI Search widget — renders into any element with [data-bonzai-widget],
- * reading its own context (topic, suggested questions) from data attributes so
- * the same component can be dropped onto any page (course, topic hub, degree, etc.)
- * and feel tailored to that page's content.
- *
- * Suggested questions: if data-bonzai-suggestions is omitted, the widget asks
- * Bonzai for the agent's configured example questions (Agent config > Example
- * questions), so suggestions can be managed centrally instead of per page.
- *
- * Responses stream in token-by-token (default Bonzai widget behavior), with a
- * blinking caret while text is still arriving.
+ * Bonzai AI Search widget — DTU LfL card pattern (sidebar-style box + chat).
  */
 (function () {
   function escapeHtml(str) {
@@ -25,32 +15,40 @@
       .map((s) => s.trim())
       .filter(Boolean);
     const theme = el.dataset.bonzaiTheme || "light";
+    const inputId = `bonzai-input-${el.dataset.bonzaiInstance || "0"}`;
 
     el.classList.add("bonzai-widget");
     if (theme === "dark") el.classList.add("on-dark");
 
     el.innerHTML = `
-      <div class="bonzai-heading">Ask about ${escapeHtml(topic)}</div>
-      <div class="bonzai-sub">Get a quick answer with links to the relevant pages.</div>
-      <div class="bonzai-chips"></div>
-      <div class="bonzai-thread" aria-live="polite"></div>
-      <div class="bonzai-input-row">
-        <input type="text" placeholder="Ask a question..." aria-label="Ask a question" />
-        <button type="button" aria-label="Send">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
-        </button>
+      <div class="bonzai-box">
+        <h4 class="bonzai-title">${escapeHtml(topic)}</h4>
+        <p class="bonzai-lead">Ask about this topic in your own words.</p>
+        <div class="bonzai-chips-wrap">
+          <div class="bonzai-chips"></div>
+        </div>
+        <div class="bonzai-thread" aria-live="polite"></div>
+        <div class="bonzai-input-row">
+          <input id="${inputId}" type="text" placeholder="Ask a question…" aria-label="Ask a question" />
+          <button type="button" class="bonzai-send">Send</button>
+        </div>
       </div>
-      <div class="bonzai-footer-note">Answers are based on this site's content and may be imperfect.</div>
     `;
 
     const chipsContainer = el.querySelector(".bonzai-chips");
+    const chipsWrap = el.querySelector(".bonzai-chips-wrap");
     const thread = el.querySelector(".bonzai-thread");
     const input = el.querySelector(".bonzai-input-row input");
-    const sendBtn = el.querySelector(".bonzai-input-row button");
+    const sendBtn = el.querySelector(".bonzai-send");
 
     function renderChips(questions) {
+      if (!questions.length) {
+        chipsWrap.hidden = true;
+        return;
+      }
+      chipsWrap.hidden = false;
       chipsContainer.innerHTML = questions
-        .map((q) => `<button class="bonzai-chip" type="button">${escapeHtml(q)}</button>`)
+        .map((q) => `<button type="button" class="bonzai-chip">${escapeHtml(q)}</button>`)
         .join("");
       chipsContainer.querySelectorAll(".bonzai-chip").forEach((chip) => {
         chip.addEventListener("click", () => ask(chip.textContent));
@@ -66,8 +64,6 @@
       return el._client;
     }
 
-    // Suggested questions: prefer explicit per-page overrides, otherwise pull
-    // the agent's centrally configured example questions from Bonzai.
     if (staticChips.length) {
       renderChips(staticChips);
     } else {
@@ -77,17 +73,36 @@
           .getExampleQuestions()
           .then((questions) => renderChips(questions.map((q) => q.question).slice(0, 4)))
           .catch(() => renderChips([]));
+      } else {
+        renderChips([]);
       }
     }
 
-    function addMessage(role, html) {
+    function scrollThread() {
+      thread.scrollTop = thread.scrollHeight;
+    }
+
+    function addMessage(role, html, { animate = true } = {}) {
       const div = document.createElement("div");
       div.className = `bonzai-msg ${role}`;
       div.innerHTML = html;
       thread.appendChild(div);
-      requestAnimationFrame(() => div.classList.add("in"));
-      thread.scrollTop = thread.scrollHeight;
+      el.classList.add("has-thread");
+      if (animate) {
+        requestAnimationFrame(() => div.classList.add("in"));
+      } else {
+        div.classList.add("in");
+      }
+      scrollThread();
       return div;
+    }
+
+    function setAnswerContent(node, html) {
+      if (html.includes("<")) {
+        node.innerHTML = html;
+      } else {
+        node.textContent = html;
+      }
     }
 
     async function ask(question) {
@@ -95,7 +110,7 @@
 
       const client = getClient();
       if (!client) {
-        addMessage("assistant", "This demo isn't connected yet. Set the Bonzai tenant key and agent ID in the bar below to go live.");
+        addMessage("assistant", "Connect Bonzai in the bar below to enable live answers.");
         return;
       }
 
@@ -103,9 +118,27 @@
       input.value = "";
       sendBtn.disabled = true;
 
-      const loadingMsg = addMessage("assistant loading", '<span class="bonzai-dots"><span></span><span></span><span></span></span>');
+      const loadingMsg = addMessage(
+        "assistant loading",
+        '<span class="bonzai-dots"><span></span><span></span><span></span></span>',
+        { animate: false }
+      );
+
       let answerSoFar = "";
       let firstChunk = true;
+      let flushScheduled = false;
+
+      function flushAnswer() {
+        flushScheduled = false;
+        setAnswerContent(loadingMsg, answerSoFar);
+        scrollThread();
+      }
+
+      function scheduleFlush() {
+        if (flushScheduled) return;
+        flushScheduled = true;
+        requestAnimationFrame(flushAnswer);
+      }
 
       try {
         const finalEvent = await client.sendMessageStreaming(question, { topic }, (delta) => {
@@ -114,28 +147,30 @@
             answerSoFar = "";
             firstChunk = false;
           }
-          // Not escaped: the API's answer field is documented as possibly containing
-          // HTML (e.g. inline formatting), matching the non-streaming response shape.
           answerSoFar += delta;
-          loadingMsg.innerHTML = answerSoFar;
-          thread.scrollTop = thread.scrollHeight;
+          scheduleFlush();
         });
+
+        if (flushScheduled) {
+          await new Promise((resolve) => requestAnimationFrame(resolve));
+        }
 
         if (!answerSoFar) {
           loadingMsg.classList.remove("loading");
-          loadingMsg.innerHTML = "No answer returned.";
+          loadingMsg.textContent = "No answer returned.";
         }
 
         if (finalEvent && finalEvent.references && finalEvent.references.length) {
           const refsHtml = finalEvent.references
             .map((r) => `<a href="${escapeHtml(r.url)}" target="_blank" rel="noopener">${escapeHtml(r.title || r.url)}</a>`)
             .join("");
-          loadingMsg.innerHTML += `<div class="bonzai-refs">${refsHtml}</div>`;
+          const bodyHtml = answerSoFar.includes("<") ? answerSoFar : escapeHtml(answerSoFar);
+          loadingMsg.innerHTML = bodyHtml + `<div class="bonzai-refs">${refsHtml}</div>`;
+          scrollThread();
         }
       } catch (err) {
-        setTyping(loadingMsg, false);
         loadingMsg.classList.remove("loading");
-        loadingMsg.innerHTML = `Something went wrong: ${escapeHtml(err.message)}`;
+        loadingMsg.textContent = `Something went wrong: ${err.message}`;
       } finally {
         sendBtn.disabled = false;
       }
@@ -148,7 +183,10 @@
   }
 
   function init() {
-    document.querySelectorAll("[data-bonzai-widget]").forEach(initWidget);
+    document.querySelectorAll("[data-bonzai-widget]").forEach((el, i) => {
+      el.dataset.bonzaiInstance = String(i);
+      initWidget(el);
+    });
   }
 
   if (document.readyState === "loading") {
