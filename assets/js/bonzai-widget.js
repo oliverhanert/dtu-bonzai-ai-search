@@ -119,23 +119,37 @@
       input.value = "";
       sendBtn.disabled = true;
       const loadingMsg = addMessage("assistant loading", "Searching…");
+      let answerSoFar = "";
+      let firstChunk = true;
 
       try {
-        const data = await client.sendMessage(question, { topic });
-        loadingMsg.classList.remove("loading");
+        const finalEvent = await client.sendMessageStreaming(question, { topic }, (delta) => {
+          if (firstChunk) {
+            loadingMsg.classList.remove("loading");
+            answerSoFar = "";
+            firstChunk = false;
+          }
+          // Not escaped: the API's answer field is documented as possibly containing
+          // HTML (e.g. inline formatting), matching the non-streaming response shape.
+          answerSoFar += delta;
+          loadingMsg.innerHTML = answerSoFar;
+          thread.scrollTop = thread.scrollHeight;
+        });
 
-        const answer = data.response && data.response.answer ? data.response.answer : "No answer returned.";
-        loadingMsg.innerHTML = answer;
+        if (!answerSoFar) {
+          loadingMsg.classList.remove("loading");
+          loadingMsg.innerHTML = "No answer returned.";
+        }
 
-        if (data.references && data.references.length) {
-          const refsHtml = data.references
+        if (finalEvent && finalEvent.references && finalEvent.references.length) {
+          const refsHtml = finalEvent.references
             .map((r) => `<a href="${escapeHtml(r.url)}" target="_blank" rel="noopener">[${r.index}] ${escapeHtml(r.title || r.url)}</a>`)
             .join("");
           loadingMsg.innerHTML += `<div class="bonzai-refs">${refsHtml}</div>`;
         }
 
-        if (data.response && data.response.messageId) {
-          addFeedbackRow(loadingMsg, client, data.response.messageId);
+        if (finalEvent && finalEvent.response && finalEvent.response.messageId) {
+          addFeedbackRow(loadingMsg, client, finalEvent.response.messageId);
         }
       } catch (err) {
         loadingMsg.classList.remove("loading");
