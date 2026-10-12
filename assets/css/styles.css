@@ -724,12 +724,12 @@ img { max-width: 100%; display: block; }
 .bonzai-thread {
   display: none;
   flex-direction: column;
-  gap: 10px;
-  max-height: 340px;
+  gap: 12px;
+  max-height: min(480px, 55vh);
+  overflow-x: hidden;
   overflow-y: auto;
-  padding: 0;
+  padding: 0 2px 0 0;
   scroll-behavior: auto;
-  contain: content;
 }
 .bonzai-widget.has-thread .bonzai-thread {
   display: flex;
@@ -739,28 +739,182 @@ img { max-width: 100%; display: block; }
 .bonzai-msg {
   font-size: 15px;
   line-height: 1.55;
-  padding: 10px 14px;
-  max-width: 92%;
   opacity: 0;
   transition: opacity 0.15s ease;
 }
 .bonzai-msg.in { opacity: 1; }
 .bonzai-msg.user {
   align-self: flex-end;
+  max-width: 92%;
+  padding: 10px 14px;
   background: var(--c-accent-red);
   color: #fff;
 }
 .bonzai-msg.assistant {
-  align-self: flex-start;
+  align-self: stretch;
+  width: 100%;
+  max-width: 100%;
+  padding: 16px 18px;
   background: #fff;
   color: var(--c-text-on-light);
 }
 .bonzai-msg.assistant.loading {
+  align-self: flex-start;
+  width: auto;
   min-height: 1.25em;
   padding: 8px 12px;
   background: transparent;
 }
-.bonzai-msg a { color: var(--c-accent-red); text-decoration: underline; }
+
+/* Answer body (markdown-lite output) */
+.bonzai-msg.assistant p {
+  margin: 0 0 14px;
+  font-size: 15px;
+  line-height: 1.6;
+  letter-spacing: 0.02em;
+  color: var(--c-text-muted-on-light);
+}
+.bonzai-msg.assistant p:last-child { margin-bottom: 0; }
+.bonzai-msg.assistant ul,
+.bonzai-msg.assistant ol {
+  margin: 0 0 16px;
+  padding-left: 1.25em;
+  color: var(--c-text-muted-on-light);
+}
+.bonzai-msg.assistant li {
+  margin-bottom: 8px;
+  line-height: 1.5;
+  padding-left: 4px;
+}
+.bonzai-msg.assistant li:last-child { margin-bottom: 0; }
+.bonzai-msg.assistant strong { font-weight: 500; color: var(--c-text-on-light); }
+.bonzai-msg.assistant .bonzai-answer-heading,
+.bonzai-msg.assistant .bonzai-answer-subheading {
+  font-family: var(--font-display);
+  font-weight: 400;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--c-text-on-light);
+  margin: 22px 0 10px;
+  line-height: 1.25;
+}
+.bonzai-msg.assistant .bonzai-answer-heading:first-child,
+.bonzai-msg.assistant .bonzai-answer-subheading:first-child {
+  margin-top: 0;
+}
+.bonzai-msg.assistant .bonzai-answer-heading { font-size: 17px; }
+.bonzai-msg.assistant .bonzai-answer-subheading { font-size: 14px; opacity: 0.9; }
+.bonzai-msg.assistant p a,
+.bonzai-msg.assistant li a {
+  color: var(--c-accent-red);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.bonzai-msg.assistant p a:hover,
+.bonzai-msg.assistant li a:hover { color: #7a0000; }
+
+/* Proactive suggestion CTA — pulled out of the agent's trailing sentence */
+.bonzai-cta {
+  margin-top: 16px;
+  padding: 18px 20px;
+  background: #fff;
+  border: 1.5px solid var(--c-accent-red);
+  border-radius: 4px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.bonzai-widget.on-dark .bonzai-cta { background: rgba(153, 0, 0, 0.08); }
+.bonzai-cta-text { margin: 0; font-size: 14.5px; line-height: 1.5; }
+.bonzai-cta-text a { color: var(--c-accent-red); text-decoration: underline; }
+.bonzai-cta-btn {
+  align-self: flex-start;
+  background: var(--c-accent-red);
+  color: #fff;
+  border: none;
+  padding: 11px 22px;
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  cursor: pointer;
+  border-radius: 2px;
+  transition: background 0.15s ease, transform 0.1s ease;
+}
+.bonzai-cta-btn:hover { background: #7a0000; transform: translateY(-1px); }
+
+/* Reference cards from Bonzai API */
+.bonzai-results {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 20px;
+  padding-top: 18px;
+  border-top: 1px solid rgba(0, 0, 0, 0.08);
+}
+.bonzai-results-label {
+  margin: 0 0 2px;
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--c-text-muted-on-light);
+}
+.bonzai-result-card {
+  display: grid;
+  grid-template-columns: 112px 1fr;
+  gap: 14px;
+  align-items: start;
+  text-decoration: none;
+  color: inherit;
+  background: var(--c-bg-gray);
+  padding: 10px;
+  transition: background 0.15s ease;
+}
+.bonzai-result-card:hover { background: #d4d4d4; }
+.bonzai-result-card:hover .bonzai-result-title { color: var(--c-accent-red); }
+.bonzai-result-img {
+  width: 112px;
+  aspect-ratio: 16 / 10;
+  background: #c7c7c7;
+  overflow: hidden;
+}
+.bonzai-result-img img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.bonzai-result-body { min-width: 0; padding: 0; }
+
+@media (max-width: 520px) {
+  .bonzai-result-card {
+    grid-template-columns: 1fr;
+  }
+  .bonzai-result-img { width: 100%; }
+}
+.bonzai-result-title {
+  font-family: var(--font-body);
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.4;
+  letter-spacing: 0.02em;
+  text-transform: none;
+  text-decoration: none;
+  color: var(--c-text-on-light);
+}
+.bonzai-result-summary {
+  margin: 6px 0 0;
+  font-size: 13px;
+  line-height: 1.45;
+  letter-spacing: 0.02em;
+  color: var(--c-text-muted-on-light);
+  text-decoration: none;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
 
 .bonzai-refs {
   margin-top: 10px;
@@ -825,7 +979,15 @@ img { max-width: 100%; display: block; }
 .bonzai-widget.on-dark .bonzai-box { background: var(--c-bg-card); color: #fff; }
 .bonzai-widget.on-dark .bonzai-lead { color: var(--c-text-muted-on-dark); }
 .bonzai-widget.on-dark .bonzai-msg.assistant { background: var(--c-bg-card); color: #fff; }
+.bonzai-widget.on-dark .bonzai-msg.assistant p,
+.bonzai-widget.on-dark .bonzai-msg.assistant li { color: var(--c-text-muted-on-dark); }
+.bonzai-widget.on-dark .bonzai-msg.assistant strong { color: #fff; }
+.bonzai-widget.on-dark .bonzai-msg.assistant p a { color: #fff; text-decoration-color: rgba(255, 255, 255, 0.35); }
 .bonzai-widget.on-dark .bonzai-msg.assistant.loading { background: transparent; }
+.bonzai-widget.on-dark .bonzai-results { border-top-color: var(--c-border-subtle); }
+.bonzai-widget.on-dark .bonzai-result-card { background: rgba(0, 0, 0, 0.2); }
+.bonzai-widget.on-dark .bonzai-result-card:hover { background: rgba(0, 0, 0, 0.35); }
+.bonzai-widget.on-dark .bonzai-result-title { color: #fff; }
 .bonzai-widget.on-dark .bonzai-input-row input { background: var(--c-bg-dark-alt); color: #fff; }
 
 /* Settings panel (demo-only key entry) */

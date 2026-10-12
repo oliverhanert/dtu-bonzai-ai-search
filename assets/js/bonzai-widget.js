@@ -97,12 +97,98 @@
       return div;
     }
 
-    function setAnswerContent(node, html) {
-      if (html.includes("<")) {
-        node.innerHTML = html;
+    function setAnswerContent(node, raw) {
+      if (typeof renderMarkdownLite === "function") {
+        node.innerHTML = renderMarkdownLite(raw);
       } else {
-        node.textContent = html;
+        node.textContent = raw;
       }
+    }
+
+    function formatResultTitle(title) {
+      if (!title) return "";
+      let t = title.trim();
+      t = t.replace(/\s*[-–—|]\s*Efteruddannelse og kurser fra DTU Learn for Life.*$/i, "");
+      t = t.replace(/\s*[-–—]\s*online course\s*$/i, "");
+      t = t.replace(/\s*[-–—]\s*Online Programme\s*$/i, "");
+      t = t.replace(/\s{2,}/g, " ");
+      if (t.length > 72) {
+        const cut = t.slice(0, 72).replace(/\s+\S*$/, "");
+        t = cut + "…";
+      }
+      return t || title.trim();
+    }
+
+    /**
+     * The agent's system prompt ends topic answers with ONE low-pressure
+     * suggestion (newsletter signup / book an advisor / find-my-course quiz),
+     * always closing with an exact quoted trigger phrase the user can repeat
+     * to hand off to the matching playbook, e.g.:
+     *   Just say "I want to learn more about wind energy" and I'll get you signed up.
+     *
+     * We pull that quoted phrase out of the rendered answer and turn it into
+     * a real CTA button instead of leaving it as buried trailing text. The
+     * button sends the exact quoted phrase, so it reliably triggers the
+     * right playbook rather than the agent trying to improvise the next step
+     * itself.
+     */
+    function extractSuggestionCta(container) {
+      const paragraphs = container.querySelectorAll("p");
+      // Matches: say "..." / sig "..." / siger "..." — any common straight or
+      // curly quote style (the agent's answer language affects which it uses).
+      const quotePattern = /\b(?:say|sig(?:er)?)\s+["'“”‘’«»]([^"'“”‘’«»]+)["'“”‘’«»]/i;
+
+      const ctaLabels = [
+        { test: /learn more about/i, label: "Yes, sign me up for updates" },
+        { test: /book a meeting|advisor|rådgiver/i, label: "Yes, book a meeting" },
+        { test: /find the right|matcher mig|quiz/i, label: "Yes, help me find a course" },
+      ];
+
+      for (const p of paragraphs) {
+        const match = p.textContent.match(quotePattern);
+        if (!match) continue;
+
+        const triggerPhrase = match[1].trim();
+        const ctaLabel = (ctaLabels.find((c) => c.test.test(p.textContent)) || {}).label || "Yes, let's do that";
+
+        const cta = document.createElement("div");
+        cta.className = "bonzai-cta";
+        cta.innerHTML = `
+          <p class="bonzai-cta-text">${p.innerHTML}</p>
+          <button type="button" class="bonzai-cta-btn">${escapeHtml(ctaLabel)}</button>
+        `;
+        p.replaceWith(cta);
+        cta.querySelector(".bonzai-cta-btn").addEventListener("click", () => {
+          ask(triggerPhrase);
+        });
+        return;
+      }
+    }
+
+    function renderReferenceCards(references) {
+      if (!references || !references.length) return "";
+      const cards = references
+        .slice(0, 3)
+        .map((r) => {
+          const title = formatResultTitle(r.title || r.url);
+          const thumb = r.image
+            ? `<div class="bonzai-result-img"><img src="${escapeHtml(r.image)}" alt="" loading="lazy" /></div>`
+            : "";
+          const summary = r.summary
+            ? `<p class="bonzai-result-summary">${escapeHtml(r.summary)}</p>`
+            : "";
+          return `
+            <a class="bonzai-result-card" href="${escapeHtml(r.url)}" target="_blank" rel="noopener">
+              ${thumb}
+              <div class="bonzai-result-body">
+                <div class="bonzai-result-title">${escapeHtml(title)}</div>
+                ${summary}
+              </div>
+            </a>
+          `;
+        })
+        .join("");
+      return `<div class="bonzai-results"><p class="bonzai-results-label">Related pages</p>${cards}</div>`;
     }
 
     async function ask(question) {
@@ -158,14 +244,16 @@
         if (!answerSoFar) {
           loadingMsg.classList.remove("loading");
           loadingMsg.textContent = "No answer returned.";
+        } else {
+          setAnswerContent(loadingMsg, answerSoFar);
+          extractSuggestionCta(loadingMsg);
         }
 
         if (finalEvent && finalEvent.references && finalEvent.references.length) {
-          const refsHtml = finalEvent.references
-            .map((r) => `<a href="${escapeHtml(r.url)}" target="_blank" rel="noopener">${escapeHtml(r.title || r.url)}</a>`)
-            .join("");
-          const bodyHtml = answerSoFar.includes("<") ? answerSoFar : escapeHtml(answerSoFar);
-          loadingMsg.innerHTML = bodyHtml + `<div class="bonzai-refs">${refsHtml}</div>`;
+          // insertAdjacentHTML appends without reparsing (and thereby destroying)
+          // the existing DOM — unlike `innerHTML +=`, which would silently drop
+          // the CTA button's click listener added by extractSuggestionCta above.
+          loadingMsg.insertAdjacentHTML("beforeend", renderReferenceCards(finalEvent.references));
           scrollThread();
         }
       } catch (err) {
