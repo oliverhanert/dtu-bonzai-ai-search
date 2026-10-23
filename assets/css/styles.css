@@ -990,6 +990,143 @@ img { max-width: 100%; display: block; }
 .bonzai-widget.on-dark .bonzai-result-title { color: #fff; }
 .bonzai-widget.on-dark .bonzai-input-row input { background: var(--c-bg-dark-alt); color: #fff; }
 
+/* ---------------------------------------------------------------- */
+/* Search page                                                       */
+/* ---------------------------------------------------------------- */
+.search-hero {
+  background: var(--c-bg-dark);
+  color: #fff;
+  padding: 180px var(--page-pad) 56px;
+}
+.search-hero h1 { font-size: clamp(40px, 5vw, 72px); line-height: 1; margin-bottom: 32px; }
+.search-form { display: flex; gap: 12px; max-width: var(--content-narrow); flex-wrap: wrap; }
+.search-form input {
+  flex: 1 1 320px;
+  height: 60px;
+  padding: 0 22px;
+  border: none;
+  font-family: var(--font-body);
+  font-size: 19px;
+  color: var(--c-text-on-light);
+}
+.search-form input:focus { outline: 2px solid var(--c-accent-red); outline-offset: 0; }
+.search-form .btn { height: 60px; }
+.search-examples {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-top: 20px;
+  max-width: var(--content-narrow);
+}
+.search-examples-label {
+  font-size: 13px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--c-text-muted-on-dark);
+  margin-right: 4px;
+}
+.search-examples button {
+  background: transparent;
+  border: 1px solid var(--c-border-subtle);
+  color: #fff;
+  padding: 6px 14px;
+  font-family: var(--font-body);
+  font-size: 14px;
+  cursor: pointer;
+}
+.search-examples button:hover { border-color: #fff; }
+
+.search-main { padding: 56px var(--page-pad) var(--space-6xl); min-height: 400px; }
+.search-status { font-size: 17px; color: var(--c-text-muted-on-light); }
+.search-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(280px, 420px);
+  grid-template-areas: "results answer";
+  gap: 56px;
+  align-items: start;
+}
+.search-layout[hidden] { display: none; }
+.search-results { grid-area: results; display: flex; flex-direction: column; gap: 20px; }
+.search-answer {
+  grid-area: answer;
+  background: var(--c-bg-gray);
+  padding: 28px;
+  position: sticky;
+  top: 124px;
+}
+.search-section-label {
+  margin: 0 0 4px;
+  font-size: 13px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--c-text-muted-on-light);
+}
+.search-answer .search-section-label { margin-bottom: 16px; }
+.search-answer-body p,
+.search-answer-body li { font-size: 16px; line-height: 1.6; color: var(--c-text-muted-on-light); }
+.search-answer-body p { margin: 0 0 14px; }
+.search-answer-body p:last-child { margin-bottom: 0; }
+.search-answer-body ul { margin: 0 0 14px; padding-left: 1.2em; }
+.search-answer-body li { margin-bottom: 6px; }
+.search-answer-body a { color: var(--c-accent-red); text-decoration: underline; }
+.search-answer-body strong { font-weight: 500; color: var(--c-text-on-light); }
+.search-answer-body .bonzai-answer-heading,
+.search-answer-body .bonzai-answer-subheading {
+  font-size: 16px;
+  letter-spacing: 0.06em;
+  margin: 18px 0 8px;
+}
+.search-answer-body .bonzai-answer-heading:first-child,
+.search-answer-body .bonzai-answer-subheading:first-child { margin-top: 0; }
+
+.search-result {
+  display: grid;
+  grid-template-columns: 200px minmax(0, 1fr);
+  gap: 24px;
+  align-items: start;
+  padding-bottom: 20px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+}
+.search-result:hover .search-result-title { color: var(--c-accent-red); }
+.search-result-img { aspect-ratio: 16 / 10; background: #e2e2e2; overflow: hidden; }
+.search-result-img img { width: 100%; height: 100%; object-fit: cover; }
+.search-result-title {
+  font-size: 22px;
+  line-height: 1.25;
+  margin: 0 0 8px;
+  transition: color 0.15s ease;
+}
+.search-result-summary {
+  margin: 0 0 8px;
+  font-size: 15px;
+  line-height: 1.55;
+  color: var(--c-text-muted-on-light);
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.search-result-url { font-size: 13px; color: var(--c-text-placeholder); word-break: break-all; }
+.search-empty { font-size: 17px; color: var(--c-text-muted-on-light); }
+.search-skeleton {
+  height: 125px;
+  background: linear-gradient(90deg, #eee 0%, #f6f6f6 50%, #eee 100%);
+  background-size: 200% 100%;
+  animation: search-shimmer 1.2s linear infinite;
+}
+@keyframes search-shimmer { to { background-position: -200% 0; } }
+
+@media (max-width: 960px) {
+  .search-layout {
+    grid-template-columns: 1fr;
+    grid-template-areas: "answer" "results";
+  }
+  .search-answer { position: static; }
+  .search-result { grid-template-columns: 120px minmax(0, 1fr); gap: 16px; }
+  .search-result-title { font-size: 18px; }
+}
+
 /* Settings panel (demo-only key entry) */
 .bonzai-config-bar {
   position: fixed;
