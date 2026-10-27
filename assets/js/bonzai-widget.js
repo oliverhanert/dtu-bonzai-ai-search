@@ -210,44 +210,18 @@
         { animate: false }
       );
 
-      let answerSoFar = "";
-      let firstChunk = true;
-      let flushScheduled = false;
-
-      function flushAnswer() {
-        flushScheduled = false;
-        setAnswerContent(loadingMsg, answerSoFar);
-        scrollThread();
-      }
-
-      function scheduleFlush() {
-        if (flushScheduled) return;
-        flushScheduled = true;
-        requestAnimationFrame(flushAnswer);
-      }
-
       try {
-        const finalEvent = await client.sendMessageStreaming(question, { topic }, (delta) => {
-          if (firstChunk) {
-            loadingMsg.classList.remove("loading");
-            answerSoFar = "";
-            firstChunk = false;
-          }
-          answerSoFar += delta;
-          scheduleFlush();
-        });
-
-        if (flushScheduled) {
-          await new Promise((resolve) => requestAnimationFrame(resolve));
-        }
+        const finalEvent = await client.sendMessage(question, { topic });
+        const answerSoFar = (finalEvent.response && finalEvent.response.answer) || "";
+        loadingMsg.classList.remove("loading");
 
         if (!answerSoFar) {
-          loadingMsg.classList.remove("loading");
           loadingMsg.textContent = "No answer returned.";
         } else {
           setAnswerContent(loadingMsg, answerSoFar);
           extractSuggestionCta(loadingMsg);
         }
+        scrollThread();
 
         if (finalEvent && finalEvent.references && finalEvent.references.length) {
           // insertAdjacentHTML appends without reparsing (and thereby destroying)

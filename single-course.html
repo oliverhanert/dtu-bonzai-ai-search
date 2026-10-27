@@ -15,6 +15,11 @@
   <ul class="nav-links">
     <li><a href="index.html">Degrees &amp; Courses</a></li>
     <li><a href="single-course.html">Single Course</a></li>
+    <li class="nav-drop"><a href="index.html#guide">Guides</a>
+      <ul class="nav-sub">
+        <li><a href="index.html#guide">Learning path<small>Questions &amp; packages</small></a></li>        <li><a href="guide-career.html">Career goal<small>Start from a role</small></a></li>
+      </ul>
+    </li>
     <li><a href="#">Events</a></li>
     <li><a href="#">About us</a></li>
     <li><a href="#">Contact</a></li>
@@ -102,6 +107,11 @@
       <a class="link" href="index.html">Back to Wind Energy →</a>
     </div>
     <div class="sidebar-card">
+      <h5>Find your learning path</h5>
+      <p class="sidebar-lead">Answer a few questions on the Wind Energy hub and get a course package matched to your background.</p>
+      <a class="link" href="index.html#guide">Open the learning path guide →</a>
+    </div>
+    <div class="sidebar-card">
       <h5>Good to know</h5>
       <ul>
         <li>Certificate of completion issued by DTU</li>
@@ -111,14 +121,6 @@
     </div>
   </aside>
 </div>
-
-<section
-  data-bonzai-guide
-  data-guide-topic="Offshore Operations &amp; Maintenance"
-  data-guide-page-type="course"
-  data-guide-title="Is this course right for you?"
-  data-guide-lead="Answer a few quick questions and we'll tell you how this course fits your background — and what to take before or after it."
-></section>
 
 <section class="section section-light course-taught">
   <h3 class="course-section-title">Taught by</h3>
@@ -207,7 +209,6 @@
 <script src="assets/js/bonzai-client.js"></script>
 <script src="assets/js/bonzai-config.js"></script>
 <script src="assets/js/markdown-lite.js"></script>
-<script src="assets/js/bonzai-guide.js"></script>
 <script>
   window.addEventListener("scroll", () => {
     document.getElementById("navbar").classList.toggle("scrolled", window.scrollY > 20);

@@ -15,6 +15,11 @@
   <ul class="nav-links">
     <li><a href="index.html">Degrees &amp; Courses</a></li>
     <li><a href="single-course.html">Single Course</a></li>
+    <li class="nav-drop"><a href="index.html#guide">Guides</a>
+      <ul class="nav-sub">
+        <li><a href="index.html#guide">Learning path<small>Questions &amp; packages</small></a></li>        <li><a href="guide-career.html">Career goal<small>Start from a role</small></a></li>
+      </ul>
+    </li>
     <li><a href="#">Events</a></li>
     <li><a href="#">About us</a></li>
     <li><a href="#">Contact</a></li>
@@ -78,10 +83,12 @@
 </section>
 
 <section
+  id="guide"
   data-bonzai-guide
   data-guide-topic="Wind Energy"
   data-guide-page-type="topic"
   data-guide-title="Find your way into wind energy"
+  data-guide-result-after="3"
 ></section>
 
 <div class="stats-bar">
@@ -222,6 +229,7 @@
 <script src="assets/js/bonzai-client.js"></script>
 <script src="assets/js/bonzai-config.js"></script>
 <script src="assets/js/markdown-lite.js"></script>
+<script src="assets/js/guide-kit.js"></script>
 <script src="assets/js/bonzai-guide.js"></script>
 <script>
   window.addEventListener("scroll", () => {

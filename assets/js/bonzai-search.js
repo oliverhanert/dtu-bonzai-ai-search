@@ -83,25 +83,13 @@
     resultsEl.innerHTML = `<div class="search-skeleton"></div><div class="search-skeleton"></div><div class="search-skeleton"></div>`;
 
     const client = new BonzaiClient(cfg);
-    let answer = "";
-    let flushScheduled = false;
 
     try {
-      const finalEvent = await client.sendMessageStreaming(query, SEARCH_CONTEXT, (delta) => {
-        if (searchId !== currentSearch) return;
-        answer += delta;
-        if (!flushScheduled) {
-          flushScheduled = true;
-          requestAnimationFrame(() => {
-            flushScheduled = false;
-            if (searchId === currentSearch) renderAnswer(answer, false);
-          });
-        }
-      });
+      const finalEvent = await client.sendMessage(query, SEARCH_CONTEXT);
       if (searchId !== currentSearch) return;
-
+      const answer = (finalEvent.response && finalEvent.response.answer) || "";
       renderAnswer(answer || "No summary available.", true);
-      renderResults(finalEvent && finalEvent.references);
+      renderResults(finalEvent.references);
     } catch (err) {
       if (searchId !== currentSearch) return;
       layout.hidden = true;
