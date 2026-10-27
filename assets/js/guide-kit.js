@@ -24,6 +24,57 @@ window.GuideKit = (function () {
     return (url || "").replace(/^https?:\/\//, "").replace(/[?#].*$/, "").replace(/\/$/, "").toLowerCase();
   }
 
+  /** Drop courses the agent invented when the same list also has real (cited) ones. */
+  function keepCited(courses) {
+    const cited = courses.filter((c) => c.matched);
+    return cited.length ? cited : courses;
+  }
+
+  function isLflUrl(url) {
+    return /lifelonglearning\.dtu\.dk/i.test(url || "");
+  }
+
+  function titleKey(title) {
+    return cleanTitle(title)
+      .toLowerCase()
+      .replace(/\s*[-–]\s*online (course|programme)\s*$/i, "")
+      .replace(/[^\p{L}\p{N}]+/gu, " ")
+      .trim();
+  }
+
+  /** Prefer cited lifelonglearning.dtu.dk URLs when the agent pasted dtu.dk links. */
+  function matchReference(label, agentUrl, refs, minScore) {
+    refs = refs || [];
+    const key = titleKey(label);
+    if (!key) return null;
+    let best = null;
+    let bestScore = 0;
+    for (const r of refs) {
+      if (!r || !r.url) continue;
+      const rk = titleKey(r.title);
+      let score = 0;
+      if (agentUrl && normalizeUrl(r.url) === normalizeUrl(agentUrl)) score += 40;
+      if (rk === key) score += 100;
+      else if (rk.startsWith(key) || key.startsWith(rk)) score += 75;
+      else if (rk.includes(key) || key.includes(rk)) score += 45;
+      if (isLflUrl(r.url)) score += 25;
+      if (score > bestScore) {
+        bestScore = score;
+        best = r;
+      }
+    }
+    return bestScore >= (minScore || 45) ? best : null;
+  }
+
+  function refForCourse(course, refs) {
+    refs = refs || [];
+    if (!course) return null;
+    const byUrl = refs.find((r) => r.url && course.url && normalizeUrl(r.url) === normalizeUrl(course.url));
+    const byTitle = matchReference(course.title, course.url, refs);
+    if (byTitle && isLflUrl(byTitle.url) && byUrl && !isLflUrl(byUrl.url)) return byTitle;
+    return byUrl || byTitle;
+  }
+
   // Tolerates markdown-escaped or doubled brackets, e.g. "\[options\]" or "[[options]]".
   function takeBlock(raw, name) {
     const open = `[\\\\\\[\\s]*\\[\\s*${name}\\s*\\\\?\\]+`;
@@ -63,6 +114,107 @@ window.GuideKit = (function () {
     return v;
   }
 
+  function formatDkk(amount) {
+    const raw = String(amount || "")
+      .replace(/\s/g, "")
+      .replace(/[.,]\d{2}$/, "")
+      .trim();
+    if (!raw) return "";
+    if (/^\d{1,3}(\.\d{3})+$/.test(raw)) return `${raw} DKK`;
+    const digits = raw.replace(/[^\d]/g, "");
+    if (!digits) return "";
+    const n = Number(digits);
+    if (!n) return "";
+    return `${n.toLocaleString("da-DK")} DKK`;
+  }
+
+  function refText(ref) {
+    if (!ref) return "";
+    return [ref.title, ref.summary, ref.description, ref.snippet, ref.content, ref.text]
+      .filter(Boolean)
+      .join(" ")
+      .replace(/<[^>]+>/g, " ");
+  }
+
+  function priceToNumber(formatted) {
+    const digits = String(formatted || "").replace(/[^\d]/g, "");
+    return digits ? Number(digits) : 0;
+  }
+
+  function extractPrice(text) {
+    if (!text) return "";
+    const s = String(text).replace(/<[^>]+>/g, " ");
+    let m = s.match(/(\d[\d.,\s]{2,})\s*(?:DKK|kr\.?)\b/i);
+    if (m) return formatDkk(m[1]);
+    m = s.match(/(?:DKK|kr\.?)\s*(\d[\d.,\s]{2,})/i);
+    if (m) return formatDkk(m[1]);
+    m = s.match(/(?:price|pris|tuition|fee)[:\s]+(\d[\d.,\s]{2,})/i);
+    if (m) return formatDkk(m[1]);
+    m = s.match(/\b(\d{1,3}(?:\.\d{3})+)\b/);
+    if (m && /kursus|course|ects|uge|week|online/i.test(s)) return formatDkk(m[1]);
+    return "";
+  }
+
+  function priceForCourses(courses, refs) {
+    const amounts = [];
+    for (const c of courses || []) {
+      const p = c.price || extractPrice(refText(refForCourse(c, refs)));
+      if (p) amounts.push(priceToNumber(p));
+    }
+    if (!amounts.length) return "";
+    if (amounts.length === 1) return formatDkk(String(amounts[0]));
+    const sum = amounts.reduce((a, b) => a + b, 0);
+    const total = formatDkk(String(sum));
+    return amounts.length < (courses || []).length ? `from ${total}` : total;
+  }
+
+  function isUsablePrice(value) {
+    const v = String(value || "").trim();
+    if (!v) return false;
+    if (/see |contact|varies|indexed|page|n\/a|tbd/i.test(v)) return false;
+    return /\d/.test(v);
+  }
+
+  function extractQualType(text, title) {
+    const blob = `${title || ""} ${text || ""}`.toLowerCase();
+    if (/diploma|diplom/i.test(blob)) return "Diploma programme";
+    if (/\bmaster\b/i.test(blob)) return "Master course";
+    if (/single[- ]course|enkeltfag/i.test(blob)) return "Single course";
+    if (/microcredential|micro credential/i.test(blob)) return "Microcredential";
+    return "";
+  }
+
+  function packageFacts(routePkg, pkgFields, stages, refs) {
+    const courses = stages ? stages.flatMap((s) => s.items) : routePkg.courses || [];
+    const agent = [
+      ...(stages && pkgFields ? pathFacts(stages, pkgFields) : []),
+      ...(routePkg.facts || []),
+    ];
+    const agentVal = (k) => (agent.find(([key]) => key === k && key) || [])[1] || "";
+    const ectsSum =
+      courses.length && courses.every((c) => c.ects != null) ? courses.reduce((s, c) => s + c.ects, 0) : null;
+    const routeCourses = routePkg.courses && routePkg.courses.length ? routePkg.courses : courses;
+    courses.forEach((c) => {
+      if (c.price) return;
+      const twin = routeCourses.find((r) => r !== c && r.price && titleKey(r.title) === titleKey(c.title));
+      if (twin) c.price = twin.price;
+    });
+    const price =
+      priceForCourses(courses, refs) ||
+      priceForCourses(routeCourses, refs) ||
+      (isUsablePrice(agentVal("Price")) ? agentVal("Price") : "");
+    const type =
+      agentVal("Type") || courses.map((c) => extractQualType(c.sourceText, c.title)).find(Boolean) || "";
+    return [
+      ["Courses", String(courses.length)],
+      ["ECTS", ectsSum != null ? String(ectsSum) : agentVal("ECTS")],
+      ["Duration", agentVal("Duration")],
+      ["Format", agentVal("Format")],
+      ["Price", price],
+      ["Type", type],
+    ].filter(([k, v]) => v && (k !== "Price" || isUsablePrice(v)));
+  }
+
   function pathFacts(stages, pkg) {
     const courses = stages.flatMap((s) => s.items);
     const n = courses.length;
@@ -82,11 +234,11 @@ window.GuideKit = (function () {
       .map(
         (c) => `
         <li>
-          <a class="pkg-course" href="${escapeHtml(c.url || "#")}" target="_blank" rel="noopener">
+          <${c.url ? "a" : "div"} class="pkg-course"${c.url ? ` href="${escapeHtml(c.url)}" target="_blank" rel="noopener"` : ""}>
             ${thumb(c, thumbCls)}
-            <span><strong>${escapeHtml(c.title)}</strong>${c.meta.length ? `<small>${escapeHtml(c.meta.join(" · "))}</small>` : ""}</span>
-            ${ARROW}
-          </a>
+            <span><strong>${escapeHtml(c.title)}</strong>${c.meta.length || c.price ? `<small>${escapeHtml([...c.meta, c.price].filter(Boolean).join(" · "))}</small>` : ""}</span>
+            ${c.url ? ARROW : ""}
+          </${c.url ? "a" : "div"}>
         </li>`
       )
       .join("");
@@ -94,6 +246,12 @@ window.GuideKit = (function () {
 
   function packageCardHtml(opts) {
     const facts = (opts.facts || [])
+      .filter(([k, v]) => {
+        const val = String(v || "").trim();
+        if (!val) return false;
+        if (k === "Price") return isUsablePrice(val);
+        return true;
+      })
       .map(([k, v]) => `<div><dt>${k}</dt><dd>${escapeHtml(v)}</dd></div>`)
       .join("");
     const stages = opts.stages || [];
@@ -204,19 +362,25 @@ window.GuideKit = (function () {
     const packages = all.blocks
       .map((lines) => {
         const f = fields(lines);
-        const courses = f.items.filter((l) => /\]\(/.test(l)).map((l) => courseWithMeta(l, refs));
+        const courses = keepCited(f.items.filter((l) => /\]\(/.test(l)).map((l) => courseWithMeta(l, refs)));
         const ects =
           courses.length && courses.every((c) => c.ects != null) ? courses.reduce((s, c) => s + c.ects, 0) : null;
         return {
           name: f.name || "",
-          fits: f.for || f.fits || "",
+          fits: briefText(f.for || f.fits || "", 90),
           best: /best|recommend/i.test(String(f.match || f.recommended || "")),
           facts: [
             ["Courses", cleanStat(f.courses, String(courses.length))],
             ["ECTS", cleanStat(f.ects, ects != null ? String(ects) : "")],
             ["Duration", cleanStat(f.duration, "")],
             ["Format", cleanStat(f.format, "")],
-          ].filter(([, v]) => v),
+            ["Price", isUsablePrice(f.price) ? cleanStat(f.price, "") : ""],
+            ["Type", cleanStat(f.type || f.qualification, "")],
+          ].filter(([k, v]) => {
+            if (!v) return false;
+            if (k === "Price") return isUsablePrice(v);
+            return true;
+          }),
           courses,
         };
       })
@@ -299,11 +463,20 @@ window.GuideKit = (function () {
     const cut = lastOptionsIndex(raw);
     let head = cut >= 0 ? raw.slice(0, cut) : visibleWhileStreaming(raw);
     head = head.replace(/\[\s*\/?\s*options[^\]]*\]/gi, "").trim();
-    const paras = head.split(/\n\n+/).map((p) => p.trim()).filter(Boolean);
-    const withQ = paras.filter((p) => p.includes("?"));
-    if (withQ.length) return cleanText(withQ[withQ.length - 1]);
-    if (paras.length) return cleanText(paras[paras.length - 1]);
-    return cleanText(head);
+    const sentences = head.match(/[^.!?]+[.!?]+/g) || [head];
+    const questions = sentences.map((s) => s.trim()).filter((s) => s.includes("?"));
+    const pick = questions.length ? questions[questions.length - 1] : sentences[sentences.length - 1] || head;
+    return briefText(cleanText(pick), 72);
+  }
+
+  /** Short label for portrait option tiles (agent options can be long). */
+  function guideOptionLabel(option) {
+    const plain = String(option || "")
+      .replace(/\[([^\]]+)\]\([^)]+\)/g, "$1")
+      .replace(/[*_#]/g, "")
+      .trim();
+    if (plain.length <= 56) return plain;
+    return plain.slice(0, 55).replace(/\s+\S*$/, "") + "…";
   }
 
   function guideStepOptions(raw) {
@@ -358,14 +531,14 @@ window.GuideKit = (function () {
     const link = cell.match(/\[([^\]]+)\]\(([^)\s]+)\)/);
     const label = link ? link[1] : cell.trim();
     const url = link ? link[2] : "";
-    const lower = label.toLowerCase();
-    const ref =
-      refs.find((r) => url && normalizeUrl(r.url) === normalizeUrl(url)) ||
-      refs.find((r) => cleanTitle(r.title).toLowerCase() === lower) ||
-      refs.find((r) => cleanTitle(r.title).toLowerCase().startsWith(lower));
+    const ref = matchReference(label, url, refs);
     return {
+      agentTitle: label,
+      agentUrl: url,
+      matched: Boolean(ref),
+      sourceText: refText(ref),
       title: ref ? cleanTitle(ref.title) : label,
-      url: ref ? ref.url : url,
+      url: ref ? ref.url : isLflUrl(url) ? url : "",
       image: ref && ref.image,
       summary: ref && ref.summary,
     };
@@ -377,6 +550,15 @@ window.GuideKit = (function () {
     const course = resolveCourse(parts[0] || "", refs);
     course.meta = parts.slice(1).filter((p) => !/^entry$/i.test(p));
     course.ects = ectsOf(course.meta);
+    if (course.ects == null) {
+      const hit = (course.sourceText || "").match(/(\d+(?:[.,]\d+)?)\s*ECTS/i);
+      if (hit) {
+        course.ects = parseFloat(hit[1].replace(",", "."));
+        course.meta.unshift(`${hit[1]} ECTS`);
+      }
+    }
+    course.price = extractPrice(course.meta.join(" ")) || extractPrice(course.sourceText);
+    course.meta = course.meta.filter((m) => !/\d\s*(?:DKK|kr\b)/i.test(m));
     return course;
   }
 
@@ -445,10 +627,10 @@ window.GuideKit = (function () {
 
   return {
     ARROW, BACK, escapeHtml, cleanTitle, takeBlock, takeAll, cleanText, briefText,
-    cleanStat, pathFacts, guideIntro, guideStepQuestion, guideStepOptions, isLastQuestionStep,
+    cleanStat, pathFacts, packageFacts, priceForCourses, refForCourse, guideIntro, guideStepQuestion, guideOptionLabel, guideStepOptions, isLastQuestionStep,
     isBrokenGuideStep, markBestPackage,
     contactBlock, packageCardHtml, parseRoutes, parseRoles, inferSkills,
-    fields, resolveCourse,
+    fields, resolveCourse, keepCited,
     courseWithMeta, renderMarkdown, thumb, metaChips, getClient, pageLanguage,
     whenVisible, fetchOnce, stream,
   };

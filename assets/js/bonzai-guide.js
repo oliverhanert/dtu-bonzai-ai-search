@@ -4,8 +4,14 @@
  */
 (function () {
   const K = window.GuideKit;
-  const START_CACHE_MS = 30 * 60 * 1000;
-
+  /** Bonzai caps the conversation at 5 turns: start + 3 answers + one forced finish. */
+  const MAX_ANSWERS = 3;
+  const FINISH_MESSAGE = "Please show my recommendation now.";
+  const DEFAULT_CONTACT = {
+    name: "DTU Learn for Life",
+    title: "+45 45 25 45 25",
+    email: "learnforlife@dtu.dk",
+  };
   function parseAnswer(raw, refs) {
     const routed = K.parseRoutes(raw, refs);
     const path = K.takeBlock(routed.rest, "path");
@@ -41,14 +47,20 @@
       if (/\|\s*entry\s*(\||$)/i.test(rest)) stage.entry = true;
       stage.items.push(K.courseWithMeta(rest, refs));
     }
-    return stages;
+    const anyCited = stages.some((s) => s.items.some((c) => c.matched));
+    if (!anyCited) return stages;
+    return stages
+      .map((s) => ({ ...s, items: s.items.filter((c) => c.matched) }))
+      .filter((s) => s.items.length);
   }
 
   function initGuide(el) {
     const topic = el.dataset.guideTopic || "DTU Learn for Life";
     const pageType = el.dataset.guidePageType || "topic";
     const title = el.dataset.guideTitle || `Find your way into ${topic}`;
-    const lead = el.dataset.guideLead || "Answer a few quick questions and we'll map out a learning path that fits your background and goals.";
+    const lead =
+      el.dataset.guideLead ||
+      "Answer a few quick questions — we'll map out a learning path that fits your background and goals.";
     const context = { mode: "guide", topic, pageType, language: K.pageLanguage(el) };
     el.classList.add("guide", "guide--guide");
     el.innerHTML = `
@@ -84,6 +96,7 @@
       </div>
     `;
 
+    const headEl = el.querySelector(".guide-head");
     const stage = el.querySelector(".guide-stage");
     const questionEl = el.querySelector(".guide-question");
     const optionsEl = el.querySelector(".guide-options");
@@ -96,6 +109,8 @@
 
     let client = null;
     let lastResult = null;
+    let lastResultRefs = [];
+    let allRefs = new Map();
     let busy = false;
     let started = false;
     let answers = [];
@@ -106,30 +121,6 @@
     let mustReplay = false;
     let bootPromise = null;
     let guideReady = false;
-
-    function startCacheKey() {
-      const cfg = window.BonzaiConfig ? BonzaiConfig.get() : null;
-      const agent = cfg && cfg.agentId ? cfg.agentId : "";
-      return `lfl-guide-start:${agent}:${context.topic}:${context.pageType}:${context.language}`;
-    }
-
-    function readStartCache() {
-      try {
-        const hit = JSON.parse(sessionStorage.getItem(startCacheKey()));
-        if (hit && Date.now() - hit.t < START_CACHE_MS && hit.raw) return hit;
-      } catch (_) {
-        /* ignore */
-      }
-      return null;
-    }
-
-    function writeStartCache(raw, references) {
-      try {
-        sessionStorage.setItem(startCacheKey(), JSON.stringify({ t: Date.now(), raw, references }));
-      } catch (_) {
-        /* ignore */
-      }
-    }
 
     function updateBar() {
       backBtn.hidden = answers.length === 0;
@@ -155,7 +146,9 @@
           optionsEl.innerHTML = "";
         } else {
           questionEl.innerHTML = `<span class="guide-skel guide-skel--line"></span><span class="guide-skel guide-skel--line short"></span>`;
-          optionsEl.innerHTML = `<span class="guide-skel guide-skel--opt"></span><span class="guide-skel guide-skel--opt"></span><span class="guide-skel guide-skel--opt"></span>`;
+          optionsEl.classList.add("guide-options--cards");
+          optionsEl.style.setProperty("--opts", "4");
+          optionsEl.innerHTML = '<span class="guide-skel guide-skel--opt"></span>'.repeat(4);
         }
         resultEl.hidden = true;
         basisEl.hidden = true;
@@ -202,7 +195,8 @@
 
     function renderResult(data) {
       lastResult = data;
-      const { routeText, packages, stages, pkg, contact } = data;
+      const { routeText, packages, stages, pkg } = data;
+      const contact = data.contact && (data.contact.name || data.contact.email) ? data.contact : DEFAULT_CONTACT;
       const intro = routeText || "";
       const multi = packages.length >= 2;
 
@@ -211,12 +205,13 @@
           .map((p, i) => {
             const staged = p.best && stages.length;
             const share = p.best ? sharePlanBtn() : "";
+            const facts = K.packageFacts(p, pkg, staged ? stages : null, lastResultRefs);
             return `<div class="guide-result-item${p.best ? " guide-result-item--best" : ""}" style="--i:${i}">${share}${K.packageCardHtml({
               best: p.best,
               badge: p.best ? "Best match for you" : "",
               name: p.name,
               fits: p.fits || (p.best && !staged ? intro : ""),
-              facts: p.facts,
+              facts,
               stages: staged ? stages : undefined,
               courses: staged ? undefined : p.courses,
               contact: p.best ? contact : null,
@@ -227,8 +222,7 @@
         resultEl.innerHTML = `
           <h3 class="guide-result-heading">${multi ? "Your options" : "Here's your recommended path"}</h3>
           ${multi && intro ? `<p class="guide-result-lead">${K.escapeHtml(intro)}</p>` : ""}
-          <div class="guide-result-grid" style="--cols:${Math.min(packages.length, 3)}">${cards}</div>
-          ${pkg.note ? `<p class="guide-result-note">${K.escapeHtml(pkg.note)}</p>` : ""}`;
+          <div class="guide-result-grid" style="--cols:${Math.min(packages.length, 3)}">${cards}</div>`;
         resultEl.hidden = false;
         return;
       }
@@ -248,13 +242,12 @@
             badge: "Recommended for you",
             name: goal ? goal.name : "Your learning path",
             fits: intro,
-            facts: K.pathFacts(stages, pkg),
+            facts: K.packageFacts({ courses: stages.flatMap((s) => s.items) }, pkg, stages, lastResultRefs),
             stages,
             contact,
             thumbCls: "pkg-thumb",
           })}</div>
-        </div>
-        ${pkg.note ? `<p class="guide-result-note">${K.escapeHtml(pkg.note)}</p>` : ""}`;
+        </div>`;
       resultEl.hidden = false;
     }
 
@@ -262,16 +255,29 @@
       const isResult = data.packages.length > 0 || data.stages.length > 0;
       el.classList.remove("is-finishing");
       el.classList.toggle("is-result", isResult);
+      el.classList.toggle("guide--asking", !isResult);
+      if (headEl) {
+        headEl.classList.toggle("guide-head--inflow", !isResult && started);
+        const leadEl = headEl.querySelector(".guide-lead");
+        if (leadEl) leadEl.hidden = started && !isResult;
+      }
       updateBar();
       transition(() => {
-        questionEl.innerHTML = isResult ? "" : data.text ? K.renderMarkdown(data.text) : "";
+        const q = isResult ? "" : data.text || "";
+        questionEl.innerHTML = q ? K.renderMarkdown(q) : "";
         if (isResult) {
           optionsEl.innerHTML = "";
           renderBasis();
           renderResult(data);
         } else {
+          const n = Math.max(data.options.length, 1);
+          optionsEl.classList.add("guide-options--cards");
+          optionsEl.style.setProperty("--opts", String(n));
           optionsEl.innerHTML = data.options
-            .map((o, i) => `<button type="button" class="guide-option" style="--i:${i}"><span>${K.escapeHtml(o)}</span>${K.ARROW}</button>`)
+            .map(
+              (o, i) =>
+                `<button type="button" class="guide-option guide-option--card" style="--i:${i}" data-answer="${K.escapeHtml(o).replace(/"/g, "&quot;")}" title="${K.escapeHtml(o).replace(/"/g, "&quot;")}"><span class="guide-option-label">${K.escapeHtml(K.guideOptionLabel(o))}</span>${K.ARROW}</button>`
+            )
             .join("");
           resultEl.hidden = true;
           basisEl.hidden = true;
@@ -281,7 +287,14 @@
 
     async function fetchTurn(msg, isFirst) {
       const { raw, references } = await K.fetchOnce(client, msg, isFirst ? context : undefined);
-      return parseAnswer(raw, references);
+      if (isFirst) allRefs = new Map();
+      (references || []).forEach((r) => r && r.url && allRefs.set(r.url, r));
+      lastResultRefs = [...allRefs.values()];
+      return parseAnswer(raw, lastResultRefs);
+    }
+
+    function isResultStep(data) {
+      return data.packages.length > 0 || data.stages.length > 0;
     }
 
     async function runDialog(msgs) {
@@ -320,11 +333,22 @@
         return;
       }
       busy = true;
-      const prev = history.length ? history[history.length - 1] : null;
-      setLoading(Boolean(prev && prev.isLastQuestion));
+      setLoading(answers.length >= MAX_ANSWERS);
       try {
         const msgs = ["start", ...answers];
-        const data = await runDialog(msgs);
+        let data = await runDialog(msgs);
+        if (!isResultStep(data) && (answers.length >= MAX_ANSWERS || !data.options.length)) {
+          setLoading(true);
+          data = await fetchTurn(FINISH_MESSAGE, false);
+          dialogTurn += 1;
+          mustReplay = true;
+        }
+        if (!isResultStep(data) && !data.options.length) {
+          questionEl.innerHTML = `<p>We couldn't build a recommendation this time.</p>`;
+          optionsEl.innerHTML = "";
+          restartBtn.hidden = false;
+          return;
+        }
         history.push(data);
         showStep(data);
       } catch (err) {
@@ -358,30 +382,11 @@
           questionEl.innerHTML = `<p>Connect Bonzai in the bar below to start.</p>`;
           return;
         }
-        const cached = readStartCache();
-        let showedCache = false;
-        if (cached) {
-          const data = parseAnswer(cached.raw, cached.references || []);
-          if (!K.isBrokenGuideStep(data, cached.raw)) {
-            history = [data];
-            started = true;
-            showStep(data);
-            showedCache = true;
-          } else {
-            try {
-              sessionStorage.removeItem(startCacheKey());
-            } catch (_) {
-              /* ignore */
-            }
-          }
-        }
-        if (!showedCache && !started) setLoading();
+        if (!started) setLoading();
         try {
           client.reset();
           client = K.getClient();
-          const { raw, references } = await K.fetchOnce(client, "start", context);
-          const data = parseAnswer(raw, references);
-          if (!K.isBrokenGuideStep(data, raw)) writeStartCache(raw, references);
+          const data = await fetchTurn("start", true);
           dialogTurn = 1;
           history = [data];
           started = true;
@@ -416,7 +421,7 @@
     el.addEventListener("click", (e) => {
       const btn = e.target.closest(".guide-option");
       if (btn) {
-        const label = btn.querySelector("span")?.textContent || btn.textContent;
+        const label = btn.dataset.answer || btn.querySelector("span")?.textContent || btn.textContent;
         answer(label);
       }
       if (e.target.closest(".guide-share-open") && lastResult) {

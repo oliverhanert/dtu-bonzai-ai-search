@@ -20,7 +20,7 @@
       .filter((s) => s && s.skill);
     if (!skills.length) skills = K.inferSkills(raw, refs);
     return {
-      text: K.briefText(intro || K.cleanText(pitch.rest), 280),
+      text: K.briefText(intro || K.cleanText(pitch.rest), 1000),
       skills,
       contact: K.fields(contact.lines),
       pitch: pitch.lines.filter(Boolean),
@@ -216,8 +216,8 @@
             ${K.thumb(e.course, "car-thumb")}
             <span class="car-plan-body">
               <strong>${K.escapeHtml(e.course.title)}</strong>
-              <small>Builds: ${K.escapeHtml(e.skills.join(", "))}</small>
-              ${K.metaChips(e.course.meta)}
+              <small>Skills: ${K.escapeHtml(e.skills.join(", "))}</small>
+              ${K.metaChips(e.course.price ? [...e.course.meta, e.course.price] : e.course.meta)}
             </span>
             ${K.ARROW}
           </a>
