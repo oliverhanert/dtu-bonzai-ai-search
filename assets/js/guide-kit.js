@@ -101,7 +101,10 @@ window.GuideKit = (function () {
     if (stages.length) {
       list = stages
         .map((s, si) => {
-          const entry = s.entry ? `<span class="pkg-stage-flag">You start here</span>` : "";
+          const entry =
+            s.entry && !/start\s*here/i.test(s.name)
+              ? `<span class="pkg-stage-flag">You start here</span>`
+              : "";
           const rows = courseRowsHtml(s.items, opts.thumbCls);
           return `
             <div class="pkg-stage">
@@ -207,7 +210,7 @@ window.GuideKit = (function () {
         return {
           name: f.name || "",
           fits: f.for || f.fits || "",
-          best: /best/i.test(f.match || ""),
+          best: /best|recommend/i.test(String(f.match || f.recommended || "")),
           facts: [
             ["Courses", cleanStat(f.courses, String(courses.length))],
             ["ECTS", cleanStat(f.ects, ects != null ? String(ects) : "")],
@@ -218,6 +221,7 @@ window.GuideKit = (function () {
         };
       })
       .filter((p) => p.name && p.courses.length);
+    markBestPackage(packages);
     return { text: guideIntro(raw), packages, rest: all.rest };
   }
 
@@ -280,6 +284,62 @@ window.GuideKit = (function () {
   function visibleWhileStreaming(raw) {
     const idx = raw.search(/[\\[\s]*\[\s*\/?\s*(?:options|path|package|route|question|role|skills)/i);
     return idx >= 0 ? raw.slice(0, idx) : raw;
+  }
+
+  function lastOptionsIndex(raw) {
+    const re = /[\\[\s]*\[\s*options\s*\\?\]/gi;
+    let last = -1;
+    let m;
+    while ((m = re.exec(raw)) !== null) last = m.index;
+    return last;
+  }
+
+  /** Visible question for the active step (last [options] block in the reply). */
+  function guideStepQuestion(raw) {
+    const cut = lastOptionsIndex(raw);
+    let head = cut >= 0 ? raw.slice(0, cut) : visibleWhileStreaming(raw);
+    head = head.replace(/\[\s*\/?\s*options[^\]]*\]/gi, "").trim();
+    const paras = head.split(/\n\n+/).map((p) => p.trim()).filter(Boolean);
+    const withQ = paras.filter((p) => p.includes("?"));
+    if (withQ.length) return cleanText(withQ[withQ.length - 1]);
+    if (paras.length) return cleanText(paras[paras.length - 1]);
+    return cleanText(head);
+  }
+
+  function guideStepOptions(raw) {
+    const { blocks } = takeAll(raw, "options");
+    return blocks.length ? blocks[blocks.length - 1] : [];
+  }
+
+  /** Agent can put [last] immediately before the final [options] block. */
+  function isLastQuestionStep(raw) {
+    const idx = lastOptionsIndex(raw);
+    if (idx < 0) return false;
+    const before = raw.slice(Math.max(0, idx - 160), idx);
+    if (/\[\s*last\s*\]/i.test(before)) return true;
+    const open = raw.slice(idx, idx + 48);
+    return /\[\s*options[^\]]*\blast\b/i.test(open);
+  }
+
+  function markBestPackage(packages) {
+    if (!packages.length) return packages;
+    if (packages.some((p) => p.best)) return packages;
+    if (packages.length === 1) {
+      packages[0].best = true;
+      return packages;
+    }
+    const hinted = packages.find((p) => /core|recommend|best\s*match/i.test(`${p.name} ${p.fits}`));
+    (hinted || packages[Math.min(1, packages.length - 1)]).best = true;
+    return packages;
+  }
+
+  function isBrokenGuideStep(data, raw) {
+    raw = raw || "";
+    if (!data || !data.options || !data.options.length) return false;
+    if (/\[\s*\/?\s*options/i.test(data.text || "")) return true;
+    if ((raw.match(/\[\\?\s*\/\s*options\s*\\?\]/gi) || []).length > 1) return true;
+    if ((data.text.match(/\?/g) || []).length > 1) return true;
+    return false;
   }
 
   // "Key: value" lines -> { key: value }; other lines are returned in `items`.
@@ -385,7 +445,9 @@ window.GuideKit = (function () {
 
   return {
     ARROW, BACK, escapeHtml, cleanTitle, takeBlock, takeAll, cleanText, briefText,
-    cleanStat, pathFacts, guideIntro, contactBlock, packageCardHtml, parseRoutes, parseRoles, inferSkills,
+    cleanStat, pathFacts, guideIntro, guideStepQuestion, guideStepOptions, isLastQuestionStep,
+    isBrokenGuideStep, markBestPackage,
+    contactBlock, packageCardHtml, parseRoutes, parseRoles, inferSkills,
     fields, resolveCourse,
     courseWithMeta, renderMarkdown, thumb, metaChips, getClient, pageLanguage,
     whenVisible, fetchOnce, stream,

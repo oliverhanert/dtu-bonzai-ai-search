@@ -11,16 +11,17 @@
     const path = K.takeBlock(routed.rest, "path");
     const pkg = K.takeBlock(path.rest, "package");
     const contact = K.takeBlock(pkg.rest, "contact");
-    const options = K.takeBlock(contact.rest, "options");
     const stages = buildStages(path.lines, refs);
+    const options = K.guideStepOptions(raw);
     return {
-      text: K.cleanText(options.rest),
+      text: K.guideStepQuestion(raw),
       routeText: K.guideIntro(raw) || routed.text,
       packages: routed.packages,
-      options: options.lines,
+      options,
       stages,
       pkg: K.fields(pkg.lines),
       contact: K.fields(contact.lines),
+      isLastQuestion: K.isLastQuestionStep(raw),
     };
   }
 
@@ -49,8 +50,6 @@
     const title = el.dataset.guideTitle || `Find your way into ${topic}`;
     const lead = el.dataset.guideLead || "Answer a few quick questions and we'll map out a learning path that fits your background and goals.";
     const context = { mode: "guide", topic, pageType, language: K.pageLanguage(el) };
-    const resultAfter = Math.max(1, Number(el.dataset.guideResultAfter) || 3);
-
     el.classList.add("guide", "guide--guide");
     el.innerHTML = `
       <div class="guide-inner">
@@ -68,10 +67,6 @@
           <div class="guide-options"></div>
           <div class="guide-result" hidden></div>
         </div>
-        <form class="guide-free" hidden>
-          <input type="text" placeholder="Or describe your situation in your own words" aria-label="Describe your situation" />
-          <button type="submit" aria-label="Send">${K.ARROW}</button>
-        </form>
       </div>
       <div class="guide-share" hidden>
         <div class="car-share-dialog guide-share-dialog" role="dialog" aria-labelledby="guide-share-title">
@@ -96,8 +91,6 @@
     const basisEl = el.querySelector(".guide-basis");
     const backBtn = el.querySelector(".guide-back");
     const restartBtn = el.querySelector(".guide-restart");
-    const freeForm = el.querySelector(".guide-free");
-    const freeInput = freeForm.querySelector("input");
     const shareEl = el.querySelector(".guide-share");
     const shareText = el.querySelector(".guide-share-text");
 
@@ -112,6 +105,7 @@
     /** After Back, the next send must replay from "start" through the new path. */
     let mustReplay = false;
     let bootPromise = null;
+    let guideReady = false;
 
     function startCacheKey() {
       const cfg = window.BonzaiConfig ? BonzaiConfig.get() : null;
@@ -283,7 +277,6 @@
           basisEl.hidden = true;
         }
       });
-      freeForm.hidden = isResult;
     }
 
     async function fetchTurn(msg, isFirst) {
@@ -327,7 +320,8 @@
         return;
       }
       busy = true;
-      setLoading(answers.length >= resultAfter);
+      const prev = history.length ? history[history.length - 1] : null;
+      setLoading(Boolean(prev && prev.isLastQuestion));
       try {
         const msgs = ["start", ...answers];
         const data = await runDialog(msgs);
@@ -343,7 +337,7 @@
 
     function answer(label) {
       label = label.trim();
-      if (busy || !label) return;
+      if (busy || !guideReady || !label) return;
       answers.push(label);
       send();
     }
@@ -365,35 +359,40 @@
           return;
         }
         const cached = readStartCache();
+        let showedCache = false;
         if (cached) {
           const data = parseAnswer(cached.raw, cached.references || []);
-          history = [data];
-          started = true;
-          showStep(data);
-        } else if (!started) {
-          setLoading();
+          if (!K.isBrokenGuideStep(data, cached.raw)) {
+            history = [data];
+            started = true;
+            showStep(data);
+            showedCache = true;
+          } else {
+            try {
+              sessionStorage.removeItem(startCacheKey());
+            } catch (_) {
+              /* ignore */
+            }
+          }
         }
-        if (dialogTurn >= 1) return;
+        if (!showedCache && !started) setLoading();
         try {
           client.reset();
           client = K.getClient();
           const { raw, references } = await K.fetchOnce(client, "start", context);
-          writeStartCache(raw, references);
           const data = parseAnswer(raw, references);
+          if (!K.isBrokenGuideStep(data, raw)) writeStartCache(raw, references);
           dialogTurn = 1;
-          if (!history.length) {
-            history = [data];
-            started = true;
-            showStep(data);
-          } else if (!answers.length) {
-            history[0] = data;
-            showStep(data);
-          }
+          history = [data];
+          started = true;
+          showStep(data);
         } catch (err) {
           if (!history.length) {
             questionEl.innerHTML = `<p>Something went wrong: ${K.escapeHtml(err.message)}</p>`;
             optionsEl.innerHTML = "";
           }
+        } finally {
+          guideReady = true;
         }
       })();
       return bootPromise;
@@ -409,13 +408,17 @@
       mustReplay = false;
       started = false;
       bootPromise = null;
+      guideReady = false;
       updateBar();
       loadGuideStart();
     }
 
     el.addEventListener("click", (e) => {
       const btn = e.target.closest(".guide-option");
-      if (btn) answer(btn.textContent);
+      if (btn) {
+        const label = btn.querySelector("span")?.textContent || btn.textContent;
+        answer(label);
+      }
       if (e.target.closest(".guide-share-open") && lastResult) {
         shareText.value = guideShareBrief(lastResult);
         shareEl.hidden = false;
@@ -443,12 +446,6 @@
     });
     backBtn.addEventListener("click", back);
     restartBtn.addEventListener("click", restart);
-    freeForm.addEventListener("submit", (e) => {
-      e.preventDefault();
-      answer(freeInput.value);
-      freeInput.value = "";
-    });
-
     updateBar();
     K.whenVisible(el, loadGuideStart);
     if (K.getClient()) loadGuideStart();
