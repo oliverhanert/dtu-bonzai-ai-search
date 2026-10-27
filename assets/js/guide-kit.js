@@ -462,11 +462,15 @@ window.GuideKit = (function () {
   function guideStepQuestion(raw) {
     const cut = lastOptionsIndex(raw);
     let head = cut >= 0 ? raw.slice(0, cut) : visibleWhileStreaming(raw);
-    head = head.replace(/\[\s*\/?\s*options[^\]]*\]/gi, "").trim();
-    const sentences = head.match(/[^.!?]+[.!?]+/g) || [head];
-    const questions = sentences.map((s) => s.trim()).filter((s) => s.includes("?"));
-    const pick = questions.length ? questions[questions.length - 1] : sentences[sentences.length - 1] || head;
-    return briefText(cleanText(pick), 72);
+    head = head.replace(/\[\s*\/?\s*(?:options|last)[^\]]*\]/gi, "").trim();
+    const lines = head.split("\n").map((l) => l.trim()).filter(Boolean);
+    const qLines = lines.filter((l) => l.includes("?"));
+    let pick = qLines.length ? qLines[qLines.length - 1] : lines[lines.length - 1] || head;
+    const sentences = pick.match(/[^.!?]+[.!?]+/g);
+    if (sentences && sentences.length > 1) {
+      pick = sentences.filter((s) => s.includes("?")).pop() || sentences.pop();
+    }
+    return briefText(cleanText(pick.replace(/^\s*(?:[-*•]|\d+\.)\s*/, "")), 160);
   }
 
   /** Short label for portrait option tiles (agent options can be long). */
@@ -538,7 +542,7 @@ window.GuideKit = (function () {
       matched: Boolean(ref),
       sourceText: refText(ref),
       title: ref ? cleanTitle(ref.title) : label,
-      url: ref ? ref.url : isLflUrl(url) ? url : "",
+      url: ref ? ref.url : "",
       image: ref && ref.image,
       summary: ref && ref.summary,
     };

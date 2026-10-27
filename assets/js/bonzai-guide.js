@@ -71,10 +71,10 @@
         </header>
         <div class="guide-bar">
           <button type="button" class="guide-back" hidden>${K.BACK}<span>Back</span></button>
+          <div class="guide-basis" hidden></div>
           <button type="button" class="guide-restart" hidden>Start over</button>
         </div>
         <div class="guide-stage" aria-live="polite">
-          <div class="guide-basis" hidden></div>
           <div class="guide-question"></div>
           <div class="guide-options"></div>
           <div class="guide-result" hidden></div>
@@ -96,7 +96,6 @@
       </div>
     `;
 
-    const headEl = el.querySelector(".guide-head");
     const stage = el.querySelector(".guide-stage");
     const questionEl = el.querySelector(".guide-question");
     const optionsEl = el.querySelector(".guide-options");
@@ -151,7 +150,6 @@
           optionsEl.innerHTML = '<span class="guide-skel guide-skel--opt"></span>'.repeat(4);
         }
         resultEl.hidden = true;
-        basisEl.hidden = true;
       });
     }
 
@@ -256,11 +254,6 @@
       el.classList.remove("is-finishing");
       el.classList.toggle("is-result", isResult);
       el.classList.toggle("guide--asking", !isResult);
-      if (headEl) {
-        headEl.classList.toggle("guide-head--inflow", !isResult && started);
-        const leadEl = headEl.querySelector(".guide-lead");
-        if (leadEl) leadEl.hidden = started && !isResult;
-      }
       updateBar();
       transition(() => {
         const q = isResult ? "" : data.text || "";
@@ -280,13 +273,14 @@
             )
             .join("");
           resultEl.hidden = true;
-          basisEl.hidden = true;
+          renderBasis();
         }
       });
     }
 
     async function fetchTurn(msg, isFirst) {
       const { raw, references } = await K.fetchOnce(client, msg, isFirst ? context : undefined);
+      window.__guideLastReply = { msg, raw, references };
       if (isFirst) allRefs = new Map();
       (references || []).forEach((r) => r && r.url && allRefs.set(r.url, r));
       lastResultRefs = [...allRefs.values()];

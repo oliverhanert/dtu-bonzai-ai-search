@@ -1172,7 +1172,7 @@ img { max-width: 100%; display: block; }
 .guide-inner { max-width: 1200px; margin: 0 auto; }
 .guide-head { text-align: center; max-width: 720px; margin: 0 auto 40px; }
 .guide-head--inflow {
-  margin-bottom: 32px;
+  margin-bottom: 48px;
 }
 .guide-head--inflow .guide-title {
   font-size: clamp(28px, 3vw, 40px);
@@ -1196,13 +1196,16 @@ img { max-width: 100%; display: block; }
 }
 
 .guide-bar {
-  display: flex;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
   align-items: center;
-  justify-content: space-between;
   gap: 24px;
   max-width: none;
-  margin: 0 auto 32px;
+  min-height: 34px;
+  margin: 0 auto 40px;
 }
+.guide-bar .guide-basis { grid-column: 2; margin: 0; }
+.guide-bar .guide-restart { grid-column: 3; }
 .guide--asking .guide-bar { max-width: none; }
 .guide-back,
 .guide-restart {
@@ -1241,7 +1244,8 @@ img { max-width: 100%; display: block; }
   margin: 0 0 12px;
 }
 .guide--asking .guide-question p {
-  font-size: clamp(22px, 2.2vw, 28px);
+  font-size: clamp(20px, 2vw, 24px);
+  font-weight: 300;
   line-height: 1.28;
   max-width: 22em;
   margin-left: auto;
