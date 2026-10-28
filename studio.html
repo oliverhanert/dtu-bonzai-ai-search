@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="da">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="robots" content="noindex, nofollow" />
+<title>AI Studio — DTU Learn for Life</title>
+<link rel="stylesheet" href="assets/css/styles.css?v=202610281323" />
+</head>
+<body class="studio-page" data-bonzai-config="bonzai-studio-config" data-bonzai-label="Bonzai AI Studio config" data-bonzai-key-label="Projekt API key" data-bonzai-agent-label="Model" data-bonzai-agent-default="claude-sonnet-4-5">
+
+<header class="studio-top">
+  <a class="studio-logo" href="index.html"><img src="assets/img/dtu-logo-white.png" alt="DTU" /></a>
+  <span class="studio-name">AI Studio <small>Internt værktøj</small></span>
+  <span class="studio-user" id="studio-user" hidden></span>
+  <button class="studio-logout" id="studio-logout" type="button" hidden>Log ud</button>
+</header>
+
+<section class="studio-login" id="studio-login">
+  <form class="studio-login-card" id="studio-login-form" autocomplete="off">
+    <h1>AI Studio</h1>
+    <p class="studio-login-lead">Adgang kun for inviterede brugere. Vi sender en loginkode til din mail.</p>
+    <div class="studio-login-step" data-step="email">
+      <label for="studio-email">Arbejdsmail</label>
+      <input id="studio-email" type="email" placeholder="navn@dtu.dk" required />
+      <button type="submit" class="studio-btn studio-btn--primary">Send loginkode</button>
+    </div>
+    <div class="studio-login-step" data-step="code" hidden>
+      <label for="studio-code">Loginkode</label>
+      <input id="studio-code" type="text" inputmode="text" placeholder="Kode fra mailen" />
+      <button type="submit" class="studio-btn studio-btn--primary">Log ind</button>
+      <button type="button" class="studio-link" id="studio-login-back">Brug en anden mail</button>
+    </div>
+    <p class="studio-login-msg" id="studio-login-msg" role="status"></p>
+  </form>
+</section>
+
+<main class="studio" id="studio" hidden>
+  <nav class="studio-tabs" role="tablist">
+    <button class="studio-tab is-active" role="tab" aria-selected="true">Kursusbeskrivelse</button>
+    <button class="studio-tab" role="tab" aria-selected="false" disabled title="Kommer senere">Markedsføring <small>Snart</small></button>
+  </nav>
+
+  <div class="studio-grid">
+    <section class="studio-chat" aria-label="Chat med AI">
+      <div class="studio-thread" id="studio-thread"></div>
+      <div class="studio-drop" id="studio-drop">
+        <input type="file" id="studio-file" accept=".docx,.txt,.md" hidden />
+        <button type="button" class="studio-btn" id="studio-upload">Upload kursustekst (.docx)</button>
+        <span>eller træk filen herind</span>
+      </div>
+      <form class="studio-input" id="studio-form">
+        <textarea id="studio-text" rows="2" placeholder="Skriv svar eller indsæt kursustekst…"></textarea>
+        <button type="submit" class="studio-btn studio-btn--primary" id="studio-send">Send</button>
+      </form>
+    </section>
+
+    <section class="studio-preview" aria-label="Preview af kursusside">
+      <div class="studio-preview-bar">
+        <span class="studio-preview-label">Preview</span>
+        <span class="studio-status" id="studio-status">Ingen kursustekst endnu</span>
+        <button type="button" class="studio-btn studio-btn--primary" id="studio-publish" disabled>Send til WordPress</button>
+      </div>
+      <div class="studio-preview-body" id="studio-preview"></div>
+    </section>
+  </div>
+</main>
+
+<div class="studio-modal" id="studio-modal" hidden>
+  <div class="studio-modal-card">
+    <h2>Sendt til WordPress</h2>
+    <p id="studio-modal-text"></p>
+    <button type="button" class="studio-btn studio-btn--primary" id="studio-modal-close">OK</button>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/mammoth@1.8.0/mammoth.browser.min.js"></script>
+<script src="assets/js/bonzai-client.js?v=202610281323"></script>
+<script src="assets/js/bonzai-config.js?v=202610281323"></script>
+<script src="assets/js/markdown-lite.js?v=202610281323"></script>
+<script src="assets/js/studio.js?v=202610281323"></script>
+</body>
+</html>

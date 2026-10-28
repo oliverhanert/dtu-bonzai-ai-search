@@ -58,19 +58,17 @@
     const topic = el.dataset.guideTopic || "DTU Learn for Life";
     const pageType = el.dataset.guidePageType || "topic";
     const title = el.dataset.guideTitle || `Find your way into ${topic}`;
-    const lead =
-      el.dataset.guideLead ||
-      "Answer a few quick questions — we'll map out a learning path that fits your background and goals.";
+    const lead = el.dataset.guideLead || "";
     const context = { mode: "guide", topic, pageType, language: K.pageLanguage(el) };
     el.classList.add("guide", "guide--guide");
     el.innerHTML = `
       <div class="guide-inner">
         <header class="guide-head">
           <h2 class="guide-title">${K.escapeHtml(title)}</h2>
-          <p class="guide-lead">${K.escapeHtml(lead)}</p>
+          ${lead ? `<p class="guide-lead">${K.escapeHtml(lead)}</p>` : ""}
         </header>
         <div class="guide-bar">
-          <button type="button" class="guide-back" hidden>${K.BACK}<span>Back</span></button>
+          <button type="button" class="guide-back" hidden>${K.BACK}<span>Previous</span></button>
           <div class="guide-basis" hidden></div>
           <button type="button" class="guide-restart" hidden>Start over</button>
         </div>

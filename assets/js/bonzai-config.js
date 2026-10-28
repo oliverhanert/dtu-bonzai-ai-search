@@ -5,7 +5,11 @@
  * exposing the key in source. For production this would live server-side.
  */
 window.BonzaiConfig = (function () {
-  const STORAGE_KEY = "bonzai-demo-config";
+  const STORAGE_KEY = (document.body && document.body.dataset.bonzaiConfig) || "bonzai-demo-config";
+  const LABEL = (document.body && document.body.dataset.bonzaiLabel) || "Bonzai AI Search demo config";
+  const KEY_LABEL = (document.body && document.body.dataset.bonzaiKeyLabel) || "Tenant key";
+  const AGENT_LABEL = (document.body && document.body.dataset.bonzaiAgentLabel) || "Agent ID";
+  const AGENT_DEFAULT = (document.body && document.body.dataset.bonzaiAgentDefault) || "";
 
   function get() {
     try {
@@ -28,9 +32,9 @@ window.BonzaiConfig = (function () {
     bar.className = "bonzai-config-bar";
     const cfg = get() || {};
     bar.innerHTML = `
-      <strong>Bonzai AI Search demo config:</strong>
-      <label>Tenant key <input type="text" id="bonzai-cfg-key" placeholder="X-API-Key" value="${cfg.apiKey || ""}" /></label>
-      <label>Agent ID <input type="text" id="bonzai-cfg-agent" placeholder="agentId (uuid)" value="${cfg.agentId || ""}" /></label>
+      <strong>${LABEL}:</strong>
+      <label>${KEY_LABEL} <input type="text" id="bonzai-cfg-key" placeholder="API key" value="${cfg.apiKey || ""}" /></label>
+      <label>${AGENT_LABEL} <input type="text" id="bonzai-cfg-agent" placeholder="${AGENT_DEFAULT || "agentId (uuid)"}" value="${cfg.agentId || AGENT_DEFAULT}" /></label>
       <button id="bonzai-cfg-save">Save &amp; connect</button>
       <span class="status" id="bonzai-cfg-status"></span>
     `;
@@ -57,6 +61,7 @@ window.BonzaiConfig = (function () {
         el._client = null;
       });
       updateStatus();
+      document.dispatchEvent(new CustomEvent("bonzai-config-change"));
     });
   }
 

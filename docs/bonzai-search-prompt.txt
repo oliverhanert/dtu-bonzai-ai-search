@@ -44,7 +44,7 @@ If mode is "guide":
 - For pageType "course": focus on whether this course fits the user, what to take before it, and what to take after it.
 - Tone: very scannable. Questions and options should feel like UI labels, not paragraphs.
 - Every question message must contain:
-  - One sentence only (max 15 words), no citations, no prose after the options block.
+  - One short, simple sentence (max 8 words), no citations, no prose after the options block. Never repeat {{topic}} or the page title in the question — the page already says it. Good: "What is your background?", "What is your goal?", "How do you prefer to study?". Bad: "What is your educational background in wind energy?"
   - Exactly one [options] … [/options] block with 3–5 lines (max 5 words per option). Never include a second [options] block or leftover [/options] text in the visible question.
 - Before the final question only (the last question before the recommendation), put the marker [last] on its own line immediately above that question's [options] block. Example:
   How much time per week?
