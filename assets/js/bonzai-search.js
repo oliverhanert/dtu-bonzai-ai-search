@@ -262,7 +262,11 @@
     const run = (async () => {
       const terms = searchTerms(q);
       const started = performance.now();
-      let res = await K.fetchOnce(client, terms, ctx);
+      /* The agent allows one answer per conversation, so every request must start a new one. */
+      const ask = () => (client.reset(), K.fetchOnce(client, terms, ctx));
+      let res = await ask();
+      /* Bonzai occasionally drops all references even though the answer cites sources; one retry recovers it. */
+      if (!res.references.length && /\[\d+\]/.test(res.raw)) res = await ask();
       window.__searchDebug = { query: q, sent: terms, ms: Math.round(performance.now() - started), raw: res.raw, references: res.references, event: res.event };
       if (!res.references.length) res = { ...res, references: linksIn(res.raw) };
       return res;
