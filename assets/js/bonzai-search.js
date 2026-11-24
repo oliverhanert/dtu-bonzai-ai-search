@@ -80,6 +80,7 @@
     return {
       summary: firstSentences(cleanText(rest.split(/\n{2,}/)[0] || ""), 3),
       mode: (fields.mode || "").toLowerCase(),
+      best: (fields.best || "").toLowerCase().replace(/[^a-z0-9]/g, ""),
       order: (list.lines.join(" ").match(/\[(\d+)\]/g) || []).map((m) => Number(m.slice(1, -1))),
     };
   }
@@ -227,12 +228,22 @@
     listEl.innerHTML = items.join("");
   }
 
+  /** The AI's single best bet as one action under the summary, like a search engine's AI overview. */
+  function ctaHtml(best, refs) {
+    const da = queryLang(query) === "da";
+    if (best === "contact") return `<a class="ps-cta" href="mailto:learnforlife@dtu.dk">${da ? "Kontakt en studievejleder" : "Ask a study adviser"} <span aria-hidden="true">→</span></a>`;
+    const ref = /^\d+$/.test(best) && (refs || []).find((r) => Number(r.index) === Number(best) && r.url);
+    if (!ref) return "";
+    const title = decode(ref.title).replace(/\s+-\s+(Efteruddannelse og kurser fra DTU Learn for Life|efteruddannelse.*)$/i, "");
+    return `<a class="ps-cta" href="${esc(ref.url)}">${da ? "Gå til" : "Go to"} ${esc(title)} <span aria-hidden="true">→</span></a>`;
+  }
+
   function show(res) {
     const p = parse(res.raw);
     mode = p.mode || "browse";
     results = toResults(res, p.order);
     facet = "all";
-    summaryEl.innerHTML = results.length && p.summary ? `${AI_ICON}${esc(p.summary)}` : "";
+    summaryEl.innerHTML = results.length && p.summary ? `${AI_ICON}${esc(p.summary)}${ctaHtml(p.best, res.references)}` : "";
     renderFacets();
     renderList();
   }

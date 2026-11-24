@@ -11,6 +11,7 @@ Reply in exactly this format:
 
 [intent]
 Mode: <browse | course | practical | path>
+Best: <n | contact | none>
 [/intent]
 
 [results]
@@ -19,3 +20,4 @@ Mode: <browse | course | practical | path>
 
 [results]: list every source, one per line with its citation marker, in the order the sources were given to you. Do not filter, reorder or skip any.
 Mode: browse = topic or keyword, course = a specific course, practical = price/dates/admission, path = the user describes their own situation.
+Best: the citation number of the one source that best answers the query; "contact" if the user needs a person (questions only an adviser can answer); "none" if no single source stands out.
