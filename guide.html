@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Study guide — Diploma in Leadership — DTU Learn for Life</title>
+<link rel="stylesheet" href="assets/css/styles.css?v=1795517039" />
+<link rel="stylesheet" href="assets/css/theme.css?v=1795517039" />
+<link rel="stylesheet" href="assets/css/search.css?v=1795517039" />
+</head>
+<body class="ps ps--guide">
+
+<header class="ps-header">
+  <a class="ps-brand" href="index.html"><img src="assets/img/dtu-logo-white.png" alt="DTU Learn for Life" /></a>
+  <nav class="ps-nav" aria-label="Main navigation">
+    <a href="index.html">Degrees &amp; courses</a>
+    <a href="single-course.html">Single course</a>
+    <a href="guide.html" aria-current="page">Study guide</a>
+    <a href="#">Events</a>
+    <a href="#">About us</a>
+    <a href="#">Contact</a>
+  </nav>
+  <div class="ps-header-right">
+    <a class="nav-studio" href="studio.html">AI Studio</a>
+    <span class="ps-lang">EN <span>DK</span></span>
+  </div>
+</header>
+
+<section class="pg-intro">
+  <p class="pg-eyebrow">Study guide · Coming soon</p>
+  <h1 class="pg-title">Find your way into the Diploma in Leadership</h1>
+  <p class="pg-lead">A personal study guide is on its way. Answer a few short questions about your background and goals, and get a suggested route through the programme.</p>
+  <p class="pg-asked" id="pg-asked" hidden></p>
+  <a class="pg-back" id="pg-back" href="search.html">← Back to search</a>
+</section>
+
+<section class="pg-section">
+  <p class="pg-label">How it will work</p>
+  <ol class="pg-steps">
+    <li><span>01</span><strong>Tell us about you</strong>Your background, experience with leadership and what you want to achieve.</li>
+    <li><span>02</span><strong>Get a suggested route</strong>Where to start, which modules fit you, and the total ECTS and price.</li>
+    <li><span>03</span><strong>Take the next step</strong>Go straight to the course pages, or talk to a study adviser.</li>
+  </ol>
+</section>
+
+<section class="pg-section">
+  <p class="pg-label">Until then</p>
+  <div class="pg-cards">
+    <a class="pg-card" href="search.html?q=diplom%20i%20ledelse"><strong>Explore the Diploma in Leadership</strong>See all modules and programme pages.</a>
+    <a class="pg-card" href="search.html?q=informationsm%C3%B8de%20ledelse"><strong>Join an info meeting</strong>Meet study advisers and former students.</a>
+    <a class="pg-card" href="mailto:learnforlife@dtu.dk"><strong>Talk to a study adviser</strong>learnforlife@dtu.dk · +45 45 25 45 25</a>
+  </div>
+</section>
+
+<footer class="ps-footer">© DTU Learn for Life — study guide prototype</footer>
+
+<script>
+  (function () {
+    var q = new URLSearchParams(location.search).get("q");
+    if (!q) return;
+    var el = document.getElementById("pg-asked");
+    el.hidden = false;
+    el.innerHTML = "You searched for <strong></strong>";
+    el.querySelector("strong").textContent = "“" + q + "”";
+    document.getElementById("pg-back").href = "search.html?q=" + encodeURIComponent(q);
+  })();
+</script>
+</body>
+</html>

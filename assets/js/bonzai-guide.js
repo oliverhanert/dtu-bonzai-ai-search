@@ -452,6 +452,8 @@
     document.querySelectorAll("[data-bonzai-guide]").forEach(initGuide);
   }
 
+  window.BonzaiGuide = { init: initGuide };
+
   if (document.readyState === "loading") {
     document.addEventListener("DOMContentLoaded", init);
   } else {

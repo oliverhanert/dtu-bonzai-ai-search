@@ -10,13 +10,22 @@ window.BonzaiConfig = (function () {
   const KEY_LABEL = (document.body && document.body.dataset.bonzaiKeyLabel) || "Tenant key";
   const AGENT_LABEL = (document.body && document.body.dataset.bonzaiAgentLabel) || "Agent ID";
   const AGENT_DEFAULT = (document.body && document.body.dataset.bonzaiAgentDefault) || "";
+  const KEY_FROM = document.body && document.body.dataset.bonzaiKeyFrom;
 
-  function get() {
+  function read(key) {
     try {
-      return JSON.parse(localStorage.getItem(STORAGE_KEY) || "null");
+      return JSON.parse(localStorage.getItem(key) || "null");
     } catch (_) {
       return null;
     }
+  }
+
+  /** Pages with their own agent can borrow the tenant key from another config (data-bonzai-key-from). */
+  function get() {
+    const own = read(STORAGE_KEY);
+    if (!KEY_FROM || (own && own.apiKey)) return own;
+    const shared = read(KEY_FROM);
+    return shared && shared.apiKey ? { ...(own || {}), apiKey: shared.apiKey } : own;
   }
 
   function set(cfg) {

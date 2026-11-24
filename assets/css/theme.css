@@ -1,0 +1,87 @@
+/* LFL design concept theme (navy, lime, light type). Load after styles.css. */
+:root {
+  --navy: #030f4f;
+  --navy-deep: #020b3f;
+  --navy-card: #0a206f;
+  --lime: #dfff19;
+  --on-accent: var(--navy);
+
+  --c-bg-dark: var(--navy);
+  --c-bg-dark-alt: var(--navy-deep);
+  --c-bg-darker: #01052b;
+  --c-bg-card: var(--navy-card);
+  --c-bg-charcoal: var(--navy-card);
+  --c-bg-light: transparent;
+  --c-bg-gray: rgba(255, 255, 255, 0.06);
+  --c-button-dark: var(--navy-card);
+  --c-accent-gray-tag: rgba(255, 255, 255, 0.18);
+  --c-accent-red: var(--lime);
+  --c-accent-red-dark: var(--lime);
+  --c-overlay-sticky: rgba(3, 15, 79, 0.92);
+
+  --c-text-on-light: #fff;
+  --c-text-muted-on-light: rgba(255, 255, 255, 0.72);
+  --c-text-placeholder: rgba(255, 255, 255, 0.5);
+}
+
+body {
+  background: linear-gradient(145deg, var(--navy) 0%, var(--navy-deep) 55%, #01052b 100%) fixed;
+  color: #fff;
+}
+
+/* White surfaces: navy text, navy accents. */
+.course-card, .sidebar-card, .bonzai-box, .bonzai-msg.assistant, .bonzai-cta, .bonzai-result-card,
+.search-answer, .guide-course, .pkg-card, .cmp-profile, .cmp-slide-opt, .cmp-card, .car-share-dialog,
+.newsletter-form input, .bonzai-input-row input {
+  --c-text-on-light: var(--navy);
+  --c-text-muted-on-light: rgba(3, 15, 79, 0.72);
+  --c-text-placeholder: rgba(3, 15, 79, 0.5);
+  --c-accent-red: var(--navy);
+  --c-accent-red-dark: var(--navy);
+  --c-bg-gray: #eef0f6;
+  --c-accent-gray-tag: var(--navy);
+  --on-accent: #fff;
+  color: var(--navy);
+}
+
+/* Solid accent surfaces: text must contrast with lime (or navy inside white cards). */
+.btn-primary, .tag-online, .bonzai-chip:hover, .bonzai-msg.user, .bonzai-cta-btn, .bonzai-send,
+.guide-path-step.is-entry .guide-path-flag, .pkg-badge, .pkg-stage-flag, .cmp-slide-meta span,
+.cmp-badge, .car-step span, .car-role:hover, .bonzai-config-bar button {
+  color: var(--on-accent);
+}
+.btn-primary:hover, .bonzai-cta-btn:hover, .bonzai-send:hover:not(:disabled) { background: #fff; color: var(--navy); }
+
+/* Sections */
+.section-light, .section-dark, .guide, .cmp { background: transparent; color: #fff; }
+.section-dark { background: rgba(0, 0, 0, 0.18); }
+.footer { background: #01052b; border-top: 1px solid rgba(255, 255, 255, 0.18); }
+.navbar { border-bottom: 1px solid rgba(255, 255, 255, 0.35); }
+.course-hero-right { background: var(--navy-deep); }
+
+/* Type: lighter, like the concept */
+h1, h2, .section-heading, .guide-title { font-weight: 300; }
+.guide-question p, .search-answer-body, .section-intro, p { font-weight: 300; }
+
+/* Guide on navy */
+.guide .guide-option--card {
+  background: linear-gradient(145deg, var(--navy-card) 0%, #05134c 100%);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  color: #fff;
+  transition: translate 0.25s ease, background 0.3s ease, color 0.3s ease;
+}
+.guide .guide-option--card:hover { background: #fff; color: var(--navy); }
+.guide .pkg-card { color: var(--navy); }
+
+/* Studio keeps its light working surface */
+.studio-page {
+  --c-accent-red: var(--navy);
+  --c-text-on-light: #111;
+  --on-accent: #fff;
+  background: #eef0f6;
+  color: #111;
+}
+.studio-top { background: var(--navy); }
+.studio-tab.is-active { background: var(--lime); }
+.nav-studio:hover { color: var(--navy); }
+.person-card .photo { background: linear-gradient(145deg, var(--navy-card) 0%, #05134c 100%); border: 1px solid rgba(255, 255, 255, 0.14); }

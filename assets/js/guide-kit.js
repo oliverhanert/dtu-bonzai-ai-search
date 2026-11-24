@@ -614,10 +614,14 @@ window.GuideKit = (function () {
   async function fetchOnce(client, message, context) {
     const event = await client.sendMessage(message, context);
     const raw = (event.response && event.response.answer) || "";
+    const resp = event.response || {};
+    const refs = [event.references, resp.references, event.sources, resp.sources, event.citations, resp.citations]
+      .find((r) => Array.isArray(r) && r.length) || [];
     return {
       raw,
-      references: event.references || [],
+      references: refs.map((r) => ({ ...r, url: r.url || r.link || r.uri || r.sourceUrl, title: r.title || r.name })),
       conversationId: event.conversationId || client.conversationId,
+      event,
     };
   }
 
