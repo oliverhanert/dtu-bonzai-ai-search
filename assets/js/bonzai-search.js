@@ -215,7 +215,7 @@
           <p>Try fewer or broader words, or one of these popular searches:</p>
           <div class="ps-empty-chips">${popular.map((q) => `<button type="button" data-q="${esc(q)}">${esc(q)}</button>`).join("")}</div>
           <div class="ps-empty-help">
-            <a href="index.html">Browse all degrees &amp; courses</a>
+            <a href="wind-energy.html">Browse all degrees &amp; courses</a>
             <a href="mailto:learnforlife@dtu.dk">Ask a study adviser</a>
           </div>
         </div>`;

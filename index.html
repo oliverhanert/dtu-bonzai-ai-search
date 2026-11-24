@@ -3,22 +3,24 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Wind Energy — DTU Learn for Life</title>
-<link rel="stylesheet" href="assets/css/styles.css?v=1795528741" />
-<link rel="stylesheet" href="assets/css/theme.css?v=1795528741" />
+<title>DTU Learn for Life — Continuing education at DTU</title>
+<link rel="stylesheet" href="assets/css/styles.css?v=1795530573" />
+<link rel="stylesheet" href="assets/css/theme.css?v=1795530573" />
 </head>
-<body data-bonzai-config="bonzai-guide-config" data-bonzai-key-from="bonzai-demo-config" data-bonzai-label="Bonzai Study guide config" data-bonzai-agent-label="Guide agent ID">
+<body class="page-home">
 
 <nav class="navbar" id="navbar">
   <div class="logo">
-    <img src="assets/img/dtu-logo-white.png" alt="DTU" />
+    <a href="index.html"><img src="assets/img/dtu-logo-white.png" alt="DTU Learn for Life" /></a>
   </div>
   <ul class="nav-links">
-    <li><a href="index.html">Degrees &amp; Courses</a></li>
+    <li><a href="wind-energy.html">Degrees &amp; Courses</a></li>
     <li><a href="single-course.html">Single Course</a></li>
-    <li class="nav-drop"><a href="index.html#guide">Guides</a>
+    <li class="nav-drop"><a href="guide.html">Guides</a>
       <ul class="nav-sub">
-        <li><a href="index.html#guide">Learning path<small>Questions &amp; packages</small></a></li>        <li><a href="guide-career.html">Career goal<small>Start from a role</small></a></li>
+        <li><a href="guide.html">Study guide<small>Diploma in Leadership</small></a></li>
+        <li><a href="wind-energy.html#guide">Learning path<small>Questions &amp; packages</small></a></li>
+        <li><a href="guide-career.html">Career goal<small>Start from a role</small></a></li>
       </ul>
     </li>
     <li><a href="#">Events</a></li>
@@ -37,165 +39,133 @@
 <header class="hero" style="background-image: url('assets/img/offshore-turbines-wide.jpg');">
   <div class="hero-main">
     <div class="hero-tags">
-      <span class="tag tag-outline">Topic</span>
+      <span class="tag tag-outline">DTU Learn for Life</span>
     </div>
-    <h1>Wind Energy</h1>
+    <h1>Lifelong learning at DTU</h1>
     <p class="hero-subtext">
-      From offshore turbines to grid integration — explore DTU Learn for Life's degrees,
-      single courses and research within wind energy, built together with Ørsted, Vestas
-      and Siemens Gamesa.
+      Continuing education for professionals — master and diploma programmes, single courses
+      and executive education, built on DTU's research and taught alongside your job.
     </p>
   </div>
   <div class="hero-links">
-    <a href="#study-options">
+    <a href="wind-energy.html">
       <span class="hero-links-title">Master programmes</span>
-      <span class="hero-links-desc">Part-time degrees built around wind energy's full value chain.</span>
+      <span class="hero-links-desc">Part-time degrees for experienced professionals.</span>
     </a>
-    <a href="#study-options">
+    <a href="guide.html">
+      <span class="hero-links-title">Diploma programmes</span>
+      <span class="hero-links-desc">Leadership, business and engineering at diploma level.</span>
+    </a>
+    <a href="single-course.html">
       <span class="hero-links-title">Single courses</span>
-      <span class="hero-links-desc">Short, focused courses you can combine into a degree.</span>
+      <span class="hero-links-desc">One course at a time — combine them into a degree.</span>
     </a>
-    <a href="#resources">
-      <span class="hero-links-title">Articles &amp; cases</span>
-      <span class="hero-links-desc">Stories from the field and the researchers behind them.</span>
-    </a>
-    <a href="#researchers">
-      <span class="hero-links-title">Researchers</span>
-      <span class="hero-links-desc">Meet the people teaching and researching wind energy.</span>
+    <a href="#">
+      <span class="hero-links-title">Executive education</span>
+      <span class="hero-links-desc">Short programmes for leaders and boards.</span>
     </a>
   </div>
 </header>
+
+<section class="section home-search" aria-labelledby="home-search-title">
+  <div class="home-search-box">
+    <h2 id="home-search-title">Find your next course</h2>
+    <p>Describe what you are looking for in our AI search — a topic, a goal or a question.</p>
+    <form class="home-search-form" action="search.html" method="get" role="search">
+      <input type="text" name="q" placeholder="Search courses, programmes, events…" aria-label="Search" autocomplete="off" required
+        data-typewriter="Courses in AI and machine learning|I am an engineer and want to move into management|Can I take a master’s while working full-time?|Courses in cybersecurity|Short courses in sustainability" />
+      <button type="submit" aria-label="Search">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="11" cy="11" r="7.5"/><line x1="21" y1="21" x2="16.5" y2="16.5"/></svg>
+      </button>
+    </form>
+    <div class="home-search-chips">
+      <span>Popular:</span>
+      <a href="search.html?q=diploma+in+leadership">Diploma in leadership</a>
+      <a href="search.html?q=wind+energy">Wind energy</a>
+      <a href="search.html?q=online+courses">Online courses</a>
+      <a href="search.html?q=project+management">Project management</a>
+    </div>
+  </div>
+</section>
+
+<section class="section section-light">
+  <h3 class="section-heading" style="font-size: 32px;">Popular right now</h3>
+  <div class="course-grid">
+    <div class="course-card">
+      <div>
+        <span class="label">Diploma</span>
+        <h4><a href="guide.html">Diploma in Leadership</a></h4>
+        <p class="desc">Part-time leadership education for engineers and specialists who lead people.</p>
+      </div>
+      <div class="meta">60 ECTS | Part-time</div>
+    </div>
+    <div class="course-card">
+      <div>
+        <span class="label">Master</span>
+        <h4><a href="wind-energy.html">Master of Wind Energy</a></h4>
+        <p class="desc">Online master programme covering the full wind value chain.</p>
+      </div>
+      <div class="meta">60 ECTS | Online</div>
+    </div>
+    <div class="course-card">
+      <div>
+        <span class="label">Single course</span>
+        <h4><a href="single-course.html">Offshore Operations</a></h4>
+        <p class="desc">Logistics and predictive maintenance for offshore wind farms.</p>
+      </div>
+      <div class="meta">15,000 DKK | 5 ECTS | 13 weeks</div>
+    </div>
+    <div class="course-card">
+      <div>
+        <span class="label">Flexible</span>
+        <h4>Flexible Master</h4>
+        <p class="desc">Design your own master across DTU's academic disciplines.</p>
+      </div>
+      <div class="meta">60 ECTS | Part-time</div>
+    </div>
+  </div>
+</section>
+
+<div class="stats-bar">
+  <div class="stat"><div class="figure">+500 COURSES</div><div class="caption">Single courses, diplomas and masters</div></div>
+  <div class="stat"><div class="figure">PART-TIME</div><div class="caption">Designed to fit alongside your job</div></div>
+  <div class="stat"><div class="figure">RESEARCH-BASED</div><div class="caption">Taught by DTU researchers</div></div>
+</div>
 
 <section class="section section-light">
   <div class="split">
     <img src="assets/img/offshore-turbines.jpg" alt="Offshore wind turbines" />
     <div class="content">
-      <h3>Shaping the future of wind</h3>
+      <h3>Not sure where to start?</h3>
       <p>
-        Denmark has worked with wind energy for more than 40 years, and DTU Learn for Life has
-        trained engineers and specialists across the entire value chain — from turbine design
-        and offshore construction to grid balancing and energy policy.
+        Our study guide asks you a few questions about your background and goals, and suggests
+        the programmes and courses that fit — starting with the Diploma in Leadership.
       </p>
-      <p>
-        Our courses and degrees are developed in close collaboration with industry, so what you
-        learn can be applied directly in your work the next day.
-      </p>
+      <p><a class="link" href="guide.html">Open the study guide →</a></p>
     </div>
   </div>
 </section>
 
-<section
-  id="guide"
-  data-bonzai-guide
-  data-guide-topic="Wind Energy"
-  data-guide-page-type="topic"
-  data-guide-title="Find your way into wind energy"
-  data-guide-result-after="3"
-></section>
-
-<div class="stats-bar">
-  <div class="stat"><div class="figure">+40 YEARS</div><div class="caption">Of experience in wind energy education</div></div>
-  <div class="stat"><div class="figure">+20 COURSES</div><div class="caption">Across degrees and single courses</div></div>
-  <div class="stat"><div class="figure">ØRSTED · VESTAS · SIEMENS GAMESA</div><div class="caption">Industry partners</div></div>
-</div>
-
-<section class="section section-dark" id="resources">
-  <h3 class="section-heading" style="font-size: 32px;">Latest from the field</h3>
+<section class="section section-dark">
+  <h3 class="section-heading" style="font-size: 32px;">Latest from DTU Learn for Life</h3>
   <div class="resources-grid">
     <div class="news-card-large">
       <img src="assets/img/turbines-sunset.jpg" alt="Wind farm at sunset" />
       <h4>How DTU engineers are solving offshore maintenance at scale</h4>
-      <p>A look into the predictive maintenance methods taught in our Single Course on Offshore Operations.</p>
+      <p>A look into the predictive maintenance methods taught in our single course on Offshore Operations.</p>
       <span class="tag tag-online">Case</span>
     </div>
     <div class="news-stack">
       <div class="news-card-small">
         <img src="assets/img/turbine-hillside.jpg" alt="Single wind turbine on hillside" />
-        <h4>Grid integration: the next decade's biggest challenge</h4>
+        <h4>From specialist to manager: what changes when you lead your former colleagues</h4>
         <span class="tag tag-single">Article</span>
       </div>
       <div class="news-card-small">
         <img src="assets/img/offshore-turbines-wide.jpg" alt="Offshore wind farm" />
-        <h4>Inside the Master Programme in Wind Energy</h4>
-        <span class="tag tag-single">Video</span>
+        <h4>Info meeting: diploma programmes in spring 2027</h4>
+        <span class="tag tag-single">Event</span>
       </div>
-    </div>
-  </div>
-</section>
-
-<div class="newsletter">
-  <h3>Stay updated</h3>
-  <p class="hero-subtext">Get the latest wind energy courses, events and research straight to your inbox.</p>
-  <div class="newsletter-form">
-    <input type="email" placeholder="Your email adresse" />
-    <button class="btn btn-primary">Sign up</button>
-  </div>
-</div>
-
-<section class="section section-light" id="researchers">
-  <h3 style="text-align:center; font-size: 48px;">Meet our researchers</h3>
-  <div class="people-row">
-    <div class="person-card">
-      <div class="photo"></div>
-      <div class="name">Marianne Thomsen</div>
-      <div class="title">Associate Professor, Wind Energy</div>
-      <a class="link" href="#">Research profile</a>
-    </div>
-    <div class="person-card">
-      <div class="photo"></div>
-      <div class="name">Lars Holm</div>
-      <div class="title">Professor, Offshore Structures</div>
-      <a class="link" href="#">Research profile</a>
-    </div>
-    <div class="person-card">
-      <div class="photo"></div>
-      <div class="name">Hans Eriksen</div>
-      <div class="title">Senior Researcher, Grid Systems</div>
-      <a class="link" href="#">Research profile</a>
-    </div>
-    <div class="person-card">
-      <div class="photo"></div>
-      <div class="name">Line Berg</div>
-      <div class="title">Associate Professor, Energy Policy</div>
-      <a class="link" href="#">Research profile</a>
-    </div>
-  </div>
-</section>
-
-<section class="section section-light" id="study-options">
-  <h3 class="section-heading" style="font-size: 32px;">Study options</h3>
-  <div class="course-grid">
-    <div class="course-card">
-      <div>
-        <span class="label">Flexible</span>
-        <h4>Master in Wind Energy</h4>
-        <p class="desc">60 ECTS part-time master programme covering the full wind value chain.</p>
-      </div>
-      <div class="meta">185,000 DKK | 60 ECTS | 2 years</div>
-    </div>
-    <div class="course-card">
-      <div>
-        <span class="label">Online</span>
-        <h4><a href="single-course.html">Offshore Operations</a></h4>
-        <p class="desc">Single course on logistics and maintenance for offshore wind farms.</p>
-      </div>
-      <div class="meta">15,000 DKK | 5 ECTS | 13 weeks</div>
-    </div>
-    <div class="course-card">
-      <div>
-        <span class="label">On campus</span>
-        <h4>Grid Integration</h4>
-        <p class="desc">Balancing renewable supply with demand in modern power grids.</p>
-      </div>
-      <div class="meta">15,000 DKK | 5 ECTS | 13 weeks</div>
-    </div>
-    <div class="course-card">
-      <div>
-        <span class="label">Flexible</span>
-        <h4>Wind Turbine Technology</h4>
-        <p class="desc">Design principles and materials behind modern turbines.</p>
-      </div>
-      <div class="meta">15,000 DKK | 5 ECTS | 13 weeks</div>
     </div>
   </div>
 </section>
@@ -204,22 +174,22 @@
   <div class="footer-grid">
     <div class="footer-col">
       <h5>DTU Learn for Life</h5>
-      <p style="font-size:13px;">Anker Engelunds Vej 1<br/>2800 Kgs. Lyngby</p>
+      <p class="footer-address">Anker Engelunds Vej 1<br/>2800 Kgs. Lyngby</p>
     </div>
     <div class="footer-col">
       <h5>Shortcuts</h5>
       <ul>
-        <li><a href="#">Degrees</a></li>
-        <li><a href="#">Single courses</a></li>
-        <li><a href="#">Events</a></li>
+        <li><a href="wind-energy.html">Degrees</a></li>
+        <li><a href="single-course.html">Single courses</a></li>
+        <li><a href="search.html">Search</a></li>
         <li><a href="#">Contact</a></li>
       </ul>
     </div>
     <div class="footer-col">
       <h5>Courses &amp; Degrees</h5>
       <ul>
-        <li><a href="#">Wind Energy</a></li>
-        <li><a href="#">Leadership</a></li>
+        <li><a href="wind-energy.html">Wind Energy</a></li>
+        <li><a href="guide.html">Leadership</a></li>
         <li><a href="#">Digitalization</a></li>
       </ul>
     </div>
@@ -228,11 +198,7 @@
   <div class="footer-bottom">© DTU Learn for Life — AI Search demo (not for production use)</div>
 </footer>
 
-<script src="assets/js/bonzai-client.js?v=1795528741"></script>
-<script src="assets/js/bonzai-config.js?v=1795528741"></script>
-<script src="assets/js/markdown-lite.js?v=1795528741"></script>
-<script src="assets/js/guide-kit.js?v=1795528741"></script>
-<script src="assets/js/bonzai-guide.js?v=1795528741"></script>
+<script src="assets/js/typewriter.js?v=1795530573"></script>
 <script>
   window.addEventListener("scroll", () => {
     document.getElementById("navbar").classList.toggle("scrolled", window.scrollY > 20);

@@ -4,31 +4,43 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Search — DTU Learn for Life</title>
-<link rel="stylesheet" href="assets/css/styles.css?v=1795528741" />
-<link rel="stylesheet" href="assets/css/search.css?v=1795528741" />
+<link rel="stylesheet" href="assets/css/styles.css?v=1795530573" />
+<link rel="stylesheet" href="assets/css/search.css?v=1795530573" />
 </head>
 <body class="ps" data-bonzai-label="Bonzai Search config" data-bonzai-agent-label="Search agent ID">
 
-<header class="ps-header">
-  <a class="ps-brand" href="index.html"><img src="assets/img/dtu-logo-white.png" alt="DTU Learn for Life" /></a>
-  <nav class="ps-nav" aria-label="Main navigation">
-    <a href="index.html">Degrees &amp; courses</a>
-    <a href="single-course.html">Single course</a>
-    <a href="guide.html">Study guide</a>
-    <a href="#">Events</a>
-    <a href="#">About us</a>
-    <a href="#">Contact</a>
-  </nav>
-  <div class="ps-header-right">
-    <a class="nav-studio" href="studio.html">AI Studio</a>
-    <span class="ps-lang">EN <span>DK</span></span>
+<nav class="navbar navbar--solid" id="navbar">
+  <div class="logo">
+    <a href="index.html"><img src="assets/img/dtu-logo-white.png" alt="DTU Learn for Life" /></a>
   </div>
-</header>
+  <ul class="nav-links">
+    <li><a href="wind-energy.html">Degrees &amp; Courses</a></li>
+    <li><a href="single-course.html">Single Course</a></li>
+    <li class="nav-drop"><a href="guide.html">Guides</a>
+      <ul class="nav-sub">
+        <li><a href="guide.html">Study guide<small>Diploma in Leadership</small></a></li>
+        <li><a href="wind-energy.html#guide">Learning path<small>Questions &amp; packages</small></a></li>
+        <li><a href="guide-career.html">Career goal<small>Start from a role</small></a></li>
+      </ul>
+    </li>
+    <li><a href="#">Events</a></li>
+    <li><a href="#">About us</a></li>
+    <li><a href="#">Contact</a></li>
+  </ul>
+  <div class="navbar-right">
+    <a class="nav-studio" href="studio.html">AI Studio</a>
+    <a class="nav-search" href="search.html" aria-label="Search">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    </a>
+    <div class="nav-lang"><span>EN</span><span class="dim">DK</span></div>
+  </div>
+</nav>
+
 
 <section class="ps-hero" id="ps-hero">
     <h1 class="ps-title">Search DTU Learn for Life</h1>
   <form class="ps-form" id="ps-form" role="search">
-    <input type="text" id="ps-input" placeholder="Search courses, programmes, events…" aria-label="Search" autocomplete="off" />
+    <input type="text" id="ps-input" placeholder="Search courses, programmes, events…" aria-label="Search" autocomplete="off" data-typewriter="Courses in AI and machine learning|I am an engineer and want to move into management|Can I take a master’s while working full-time?|Courses in cybersecurity|Short courses in sustainability" />
     <button type="button" class="ps-clear" id="ps-clear" aria-label="Clear search" hidden>
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><line x1="6" y1="6" x2="18" y2="18"/><line x1="18" y1="6" x2="6" y2="18"/></svg>
     </button>
@@ -65,10 +77,11 @@
 
 <footer class="ps-footer">© DTU Learn for Life — AI search prototype</footer>
 
-<script src="assets/js/bonzai-client.js?v=1795528741"></script>
-<script src="assets/js/bonzai-config.js?v=1795528741"></script>
-<script src="assets/js/markdown-lite.js?v=1795528741"></script>
-<script src="assets/js/guide-kit.js?v=1795528741"></script>
-<script src="assets/js/bonzai-search.js?v=1795528741"></script>
+<script src="assets/js/bonzai-client.js?v=1795530573"></script>
+<script src="assets/js/bonzai-config.js?v=1795530573"></script>
+<script src="assets/js/markdown-lite.js?v=1795530573"></script>
+<script src="assets/js/guide-kit.js?v=1795530573"></script>
+<script src="assets/js/bonzai-search.js?v=1795530573"></script>
+<script src="assets/js/typewriter.js?v=1795530573"></script>
 </body>
 </html>
